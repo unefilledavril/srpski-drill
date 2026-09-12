@@ -1,0 +1,702 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9169c1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Srpski">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,400;6..144,500;6..144,600;6..144,700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#f2e7f5;
+    --surface:#ffffff;
+    --surface-2:#dfc8e4;
+    --accent:#9169c1;
+    --accent-dim:#b793d2;
+    --deep:#462d86;
+    --text:#3a2a5c;
+    --text-dim:#8672a3;
+    --ok:#2e7c28;
+    --ok-soft:#82ac33;
+    --bad:#b1466a;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:transparent;color:var(--text);font-family:'Google Sans Flex',system-ui,sans-serif;width:100%;overflow-x:hidden;}
+  #app{max-width:520px;margin:0 auto;padding:20px 16px 40px;background:var(--bg);width:100%;}
+
+  @media (max-width:380px){
+    #app{padding:16px 12px 32px;}
+    .word-main{font-size:clamp(22px,7.5vw,30px);}
+    .header h1{font-size:20px;}
+  }
+
+  .letter-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;justify-content:center;}
+  .letter-btn{background:var(--surface-2);border:0;color:var(--deep);font-family:inherit;font-weight:600;font-size:16px;width:38px;height:38px;border-radius:10px;cursor:pointer;}
+  .letter-btn:active{background:var(--accent);color:#fff;}
+
+  .chip{background:var(--surface-2);border:0;color:var(--deep);font-family:inherit;font-weight:600;font-size:12.5px;padding:8px 12px;border-radius:20px;cursor:pointer;opacity:.75;}
+  .chip.active{background:var(--accent);color:#fff;opacity:1;}
+
+  .topic-header{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--surface-2);border:0;border-radius:12px;padding:12px 14px;color:var(--deep);font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;}
+  .topic-header .chevron{color:var(--accent);font-size:11px;}
+
+  select{width:100%;background:var(--surface-2);border:1.5px solid transparent;border-radius:12px;padding:11px 12px;color:var(--deep);font-family:inherit;font-size:14px;}
+
+  h1,h2,h3,.serif{font-family:'Google Sans Flex',system-ui,sans-serif;font-weight:700;}
+
+  .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .header h1{font-size:22px;margin:0;letter-spacing:.2px;color:var(--deep);}
+  .header .sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .search-box{display:flex;gap:4px;flex-shrink:0;}
+  .search-box input{width:110px;background:var(--surface);border:1.5px solid var(--surface-2);border-radius:20px;padding:8px 12px;color:var(--deep);font-family:inherit;font-size:12.5px;}
+  .search-box input:focus{outline:none;border-color:var(--accent);}
+  .search-btn{background:var(--accent);color:#fff;border:0;border-radius:20px;width:32px;font-size:14px;font-weight:700;cursor:pointer;}
+  .search-msg{font-size:11.5px;color:var(--bad);text-align:right;margin:-10px 0 12px;}
+
+  .tabs{display:flex;gap:8px;margin-bottom:18px;background:var(--surface);padding:5px;border-radius:14px;box-shadow:0 1px 3px rgba(70,45,134,.08);}
+  .tab{flex:1;text-align:center;padding:10px 8px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;color:var(--text-dim);transition:.15s;}
+  .tab.active{background:var(--accent);color:#fff;}
+
+  .panel{background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(70,45,134,.08);}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .seg{display:flex;background:var(--surface-2);border-radius:10px;padding:3px;flex:1;min-width:140px;}
+  .seg button{flex:1;background:none;border:0;color:var(--deep);opacity:.55;font-family:inherit;font-size:12.5px;padding:8px 6px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .seg button.active{background:var(--accent);color:#fff;opacity:1;}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--text-dim);margin:10px 0 4px;font-weight:600;}
+
+  .card-wrap{perspective:1200px;margin:18px 0 14px;}
+  .card{position:relative;min-height:190px;border-radius:20px;cursor:pointer;transition:transform .5s;transform-style:preserve-3d;}
+  .card.flipped{transform:rotateY(180deg);}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;border:1.5px dashed var(--accent-dim);}
+  .front{background:radial-gradient(circle at 30% 20%, #f6ecf9, #ecdcf1);}
+  .back{background:radial-gradient(circle at 70% 80%, #e4d3ee, #d7bfe6);transform:rotateY(180deg);}
+  .card .tag{position:absolute;top:12px;left:14px;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);opacity:.85;}
+  .word-main{font-size:30px;font-weight:700;line-height:1.25;color:var(--deep);}
+  .word-sub{font-size:13px;color:var(--text-dim);margin-top:8px;}
+  .word-meta{font-size:12px;color:var(--accent);margin-top:6px;font-weight:600;}
+  .hint{font-size:11px;color:var(--text-dim);margin-top:14px;opacity:.8;}
+
+  .nav-row{display:flex;gap:8px;align-items:center;}
+  .btn{border:0;border-radius:12px;padding:12px 14px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;background:var(--surface-2);color:var(--deep);}
+  .btn:active{transform:scale(.97);}
+  .btn.primary{background:var(--accent);color:#fff;}
+  .btn.ok{background:var(--ok);color:#fff;}
+  .btn.bad{background:var(--bad);color:#fff;}
+  .btn.ghost{background:transparent;border:1px solid var(--surface-2);color:var(--text-dim);}
+  .btn.wide{flex:1;}
+  .btn.small{padding:8px 10px;font-size:12px;}
+  .btn:disabled{opacity:.4;cursor:default;}
+
+  input[type=text]{width:100%;background:var(--surface-2);border:1.5px solid transparent;border-radius:12px;padding:13px 14px;color:var(--deep);font-family:inherit;font-size:16px;}
+  input[type=text]::placeholder{color:var(--text-dim);}
+  input[type=text]:focus{outline:none;border-color:var(--accent);}
+  input[type=text].ok{border-color:var(--ok);}
+  input[type=text].bad{border-color:var(--bad);}
+
+  .timerbar-track{height:5px;background:var(--surface-2);border-radius:5px;overflow:hidden;margin-bottom:14px;}
+  .timerbar-fill{height:100%;background:var(--accent);width:100%;}
+
+  .score-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+  .score-row b{color:var(--deep);}
+
+  .sentence{font-size:19px;line-height:1.5;font-family:'Google Sans Flex',system-ui,sans-serif;font-weight:500;text-align:center;padding:14px 6px 4px;color:var(--deep);}
+  .ru-sentence{font-size:12.5px;text-align:center;color:var(--text-dim);padding-bottom:10px;}
+  .blank{display:inline-block;min-width:70px;border-bottom:2px solid var(--accent);color:var(--accent);font-weight:700;}
+  .pron-tag{display:inline-block;font-size:11px;color:var(--deep);background:var(--surface-2);padding:3px 9px;border-radius:20px;margin-bottom:10px;}
+  .group-tag{font-size:11px;color:var(--accent);opacity:.9;}
+  .rules-link{background:none;border:0;color:var(--accent);font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;text-decoration:underline;padding:2px 0;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(40,20,55,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+  .modal-box{position:relative;background:var(--surface);border-radius:20px;padding:20px;max-width:440px;width:100%;max-height:80vh;overflow-y:auto;}
+  .modal-box h3{margin:0 0 4px;color:var(--deep);font-size:19px;font-family:'Google Sans Flex',system-ui,sans-serif;}
+  .modal-sub{font-size:12px;color:var(--text-dim);margin-bottom:14px;}
+  .modal-close{position:absolute;top:14px;right:14px;background:var(--surface-2);border:0;border-radius:8px;width:30px;height:30px;color:var(--deep);font-size:16px;cursor:pointer;}
+  .conj-block{margin-bottom:16px;}
+  .conj-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .conj-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .conj-table td, .conj-table th{border:1px solid var(--surface-2);padding:7px 5px;text-align:center;color:var(--deep);}
+  .conj-table th{background:var(--surface-2);font-size:10.5px;color:var(--text-dim);font-weight:600;}
+
+  .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .opt{background:var(--surface-2);border:1.5px solid transparent;border-radius:12px;padding:12px 8px;text-align:center;font-weight:600;cursor:pointer;font-size:15px;color:var(--deep);}
+  .opt.correct{border-color:var(--ok);background:#e4efd8;}
+  .opt.wrong{border-color:var(--bad);background:#f6dfe7;}
+
+  .feedback{font-size:13px;margin-top:10px;text-align:center;min-height:18px;}
+  .feedback.ok{color:var(--ok);}
+  .feedback.bad{color:var(--bad);}
+
+  .add-form{display:flex;gap:8px;margin-top:8px;}
+  .add-form input{flex:1;}
+  .stat-line{font-size:11px;color:var(--text-dim);text-align:center;margin-top:8px;}
+  .empty{text-align:center;color:var(--text-dim);font-size:13px;padding:20px 10px;}
+  a{color:var(--accent);}
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+
+/* ---------------- STANDALONE STORAGE FALLBACK ---------------- */
+/* window.storage only exists inside Claude's artifact runtime.
+   When this file is opened directly (e.g. as an installed PWA), it
+   doesn't exist — so we fall back to the browser's own localStorage
+   with the same get/set/delete interface. */
+if(typeof window.storage === 'undefined'){
+  window.storage = {
+    async get(key){
+      try{
+        const v = localStorage.getItem('srpski_'+key);
+        return v===null ? null : {key, value:v, shared:false};
+      }catch(e){ return null; }
+    },
+    async set(key, value){
+      try{
+        localStorage.setItem('srpski_'+key, value);
+        return {key, value, shared:false};
+      }catch(e){ return null; }
+    },
+    async delete(key){
+      try{ localStorage.removeItem('srpski_'+key); return {key, deleted:true, shared:false}; }
+      catch(e){ return null; }
+    },
+    async list(){ return null; }
+  };
+}
+
+/* ---------------- DATA (Latin script) ---------------- */
+
+const TOPICS = [{"id": "osnove", "label": "Основы и приветствия"}, {"id": "sluzbene", "label": "Служебные слова"}, {"id": "ljudi", "label": "Люди и семья"}, {"id": "telo", "label": "Тело и здоровье"}, {"id": "odeca", "label": "Одежда"}, {"id": "kuca", "label": "Дом и быт"}, {"id": "hrana", "label": "Еда и напитки"}, {"id": "grad", "label": "Город и места"}, {"id": "transport", "label": "Транспорт"}, {"id": "priroda", "label": "Природа и животные"}, {"id": "vreme", "label": "Время и погода"}, {"id": "brojevi", "label": "Числа и количество"}, {"id": "posao", "label": "Работа и учёба"}, {"id": "emocije", "label": "Эмоции и характер"}, {"id": "glagoli", "label": "Глаголы (действия)"}, {"id": "pridevi", "label": "Прилагательные"}, {"id": "putovanja", "label": "Путешествия"}, {"id": "kupovina", "label": "Покупки и деньги"}, {"id": "tehnologije", "label": "Технологии"}, {"id": "sport", "label": "Спорт и хобби"}];
+
+const WORDS = [{"sr": "zdravo", "ru": "привет", "cat": "osnove"}, {"sr": "doviđenja", "ru": "до свидания", "cat": "osnove"}, {"sr": "hvala", "ru": "спасибо", "cat": "osnove"}, {"sr": "molim", "ru": "пожалуйста", "cat": "osnove"}, {"sr": "izvini", "ru": "извини", "cat": "osnove"}, {"sr": "izvinite", "ru": "извините", "cat": "osnove"}, {"sr": "da", "ru": "да", "cat": "osnove"}, {"sr": "ne", "ru": "нет", "cat": "osnove"}, {"sr": "dobro", "ru": "хорошо", "cat": "osnove"}, {"sr": "dobar dan", "ru": "добрый день", "cat": "osnove"}, {"sr": "dobro jutro", "ru": "доброе утро", "cat": "osnove"}, {"sr": "dobro veče", "ru": "добрый вечер", "cat": "osnove"}, {"sr": "laku noć", "ru": "спокойной ночи", "cat": "osnove"}, {"sr": "kako si", "ru": "как дела (тебе)", "cat": "osnove"}, {"sr": "kako ste", "ru": "как дела (вам)", "cat": "osnove"}, {"sr": "ćao", "ru": "привет / пока", "cat": "osnove"}, {"sr": "vidimo se", "ru": "увидимся", "cat": "osnove"}, {"sr": "prijatno", "ru": "приятного", "cat": "osnove"}, {"sr": "dobrodošli", "ru": "добро пожаловать", "cat": "osnove"}, {"sr": "nema na čemu", "ru": "не за что", "cat": "osnove"}, {"sr": "izvoli", "ru": "пожалуйста (при подаче)", "cat": "osnove"}, {"sr": "izvolite", "ru": "пожалуйста (вежл., при подаче)", "cat": "osnove"}, {"sr": "naravno", "ru": "конечно", "cat": "osnove"}, {"sr": "možda", "ru": "может быть", "cat": "osnove"}, {"sr": "sigurno", "ru": "наверняка", "cat": "osnove"}, {"sr": "u redu", "ru": "хорошо, ладно", "cat": "osnove"}, {"sr": "nema problema", "ru": "нет проблем", "cat": "osnove"}, {"sr": "nažalost", "ru": "к сожалению", "cat": "osnove"}, {"sr": "srećom", "ru": "к счастью", "cat": "osnove"}, {"sr": "tačno", "ru": "точно, верно", "cat": "osnove"}, {"sr": "baš", "ru": "именно, прямо", "cat": "osnove"}, {"sr": "možeš li", "ru": "можешь ли ты", "cat": "osnove"}, {"sr": "mogu li", "ru": "могу ли я", "cat": "osnove"}, {"sr": "oprosti", "ru": "прости", "cat": "osnove"}, {"sr": "oprostite", "ru": "простите", "cat": "osnove"}, {"sr": "ja", "ru": "я", "cat": "sluzbene"}, {"sr": "ti", "ru": "ты", "cat": "sluzbene"}, {"sr": "on", "ru": "он", "cat": "sluzbene"}, {"sr": "ona", "ru": "она", "cat": "sluzbene"}, {"sr": "ono", "ru": "оно", "cat": "sluzbene"}, {"sr": "mi", "ru": "мы", "cat": "sluzbene"}, {"sr": "vi", "ru": "вы", "cat": "sluzbene"}, {"sr": "oni", "ru": "они (м.р.)", "cat": "sluzbene"}, {"sr": "one", "ru": "они (ж.р.)", "cat": "sluzbene"}, {"sr": "gde", "ru": "где", "cat": "sluzbene"}, {"sr": "kada", "ru": "когда", "cat": "sluzbene"}, {"sr": "kako", "ru": "как", "cat": "sluzbene"}, {"sr": "šta", "ru": "что", "cat": "sluzbene"}, {"sr": "ko", "ru": "кто", "cat": "sluzbene"}, {"sr": "koji", "ru": "который, какой", "cat": "sluzbene"}, {"sr": "zašto", "ru": "почему", "cat": "sluzbene"}, {"sr": "zato što", "ru": "потому что", "cat": "sluzbene"}, {"sr": "takođe", "ru": "также", "cat": "sluzbene"}, {"sr": "opet", "ru": "снова", "cat": "sluzbene"}, {"sr": "ovde", "ru": "здесь", "cat": "sluzbene"}, {"sr": "tamo", "ru": "там", "cat": "sluzbene"}, {"sr": "brzo", "ru": "быстро", "cat": "sluzbene"}, {"sr": "polako", "ru": "медленно, не спеша", "cat": "sluzbene"}, {"sr": "i", "ru": "и", "cat": "sluzbene"}, {"sr": "ili", "ru": "или", "cat": "sluzbene"}, {"sr": "ali", "ru": "но", "cat": "sluzbene"}, {"sr": "ako", "ru": "если", "cat": "sluzbene"}, {"sr": "jer", "ru": "потому что (союз)", "cat": "sluzbene"}, {"sr": "kad", "ru": "когда (союз)", "cat": "sluzbene"}, {"sr": "dok", "ru": "пока, в то время как", "cat": "sluzbene"}, {"sr": "bez", "ru": "без", "cat": "sluzbene"}, {"sr": "sa", "ru": "с", "cat": "sluzbene"}, {"sr": "za", "ru": "для, за", "cat": "sluzbene"}, {"sr": "od", "ru": "от, из", "cat": "sluzbene"}, {"sr": "do", "ru": "до", "cat": "sluzbene"}, {"sr": "kroz", "ru": "через, сквозь", "cat": "sluzbene"}, {"sr": "pored", "ru": "рядом с", "cat": "sluzbene"}, {"sr": "porodica", "ru": "семья", "cat": "ljudi", "gender": "ж", "plural": "porodice"}, {"sr": "mama", "ru": "мама", "cat": "ljudi", "gender": "ж", "plural": "mame"}, {"sr": "tata", "ru": "папа", "cat": "ljudi", "gender": "м", "plural": "tate"}, {"sr": "otac", "ru": "отец", "cat": "ljudi", "gender": "м", "plural": "očevi"}, {"sr": "majka", "ru": "мать", "cat": "ljudi", "gender": "ж", "plural": "majke"}, {"sr": "brat", "ru": "брат", "cat": "ljudi", "gender": "м", "plural": "braća"}, {"sr": "sestra", "ru": "сестра", "cat": "ljudi", "gender": "ж", "plural": "sestre"}, {"sr": "sin", "ru": "сын", "cat": "ljudi", "gender": "м", "plural": "sinovi"}, {"sr": "ćerka", "ru": "дочь", "cat": "ljudi", "gender": "ж", "plural": "ćerke"}, {"sr": "muž", "ru": "муж", "cat": "ljudi", "gender": "м", "plural": "muževi"}, {"sr": "žena", "ru": "жена, женщина", "cat": "ljudi", "gender": "ж", "plural": "žene"}, {"sr": "dete", "ru": "ребёнок", "cat": "ljudi", "gender": "с", "plural": "deca"}, {"sr": "deca", "ru": "дети", "cat": "ljudi", "gender": "ж", "plural": null}, {"sr": "prijatelj", "ru": "друг", "cat": "ljudi", "gender": "м", "plural": "prijatelji"}, {"sr": "baka", "ru": "бабушка", "cat": "ljudi", "gender": "ж", "plural": "bake"}, {"sr": "deda", "ru": "дедушка", "cat": "ljudi", "gender": "м", "plural": "dede"}, {"sr": "ujak", "ru": "дядя (по матери)", "cat": "ljudi", "gender": "м", "plural": "ujaci"}, {"sr": "tetka", "ru": "тётя", "cat": "ljudi", "gender": "ж", "plural": "tetke"}, {"sr": "rođak", "ru": "родственник, кузен", "cat": "ljudi", "gender": "м", "plural": "rođaci"}, {"sr": "rođaka", "ru": "родственница, кузина", "cat": "ljudi", "gender": "ж", "plural": "rođake"}, {"sr": "unuk", "ru": "внук", "cat": "ljudi", "gender": "м", "plural": "unuci"}, {"sr": "unuka", "ru": "внучка", "cat": "ljudi", "gender": "ж", "plural": "unuke"}, {"sr": "momak", "ru": "парень (бойфренд)", "cat": "ljudi", "gender": "м", "plural": "momci"}, {"sr": "devojka", "ru": "девушка (girlfriend)", "cat": "ljudi", "gender": "ж", "plural": "devojke"}, {"sr": "verenik", "ru": "жених", "cat": "ljudi", "gender": "м", "plural": "verenici"}, {"sr": "verenica", "ru": "невеста", "cat": "ljudi", "gender": "ж", "plural": "verenice"}, {"sr": "komšija", "ru": "сосед", "cat": "ljudi", "gender": "м", "plural": "komšije"}, {"sr": "komšinica", "ru": "соседка", "cat": "ljudi", "gender": "ж", "plural": "komšinice"}, {"sr": "kolega", "ru": "коллега (м.)", "cat": "ljudi", "gender": "м", "plural": "kolege"}, {"sr": "koleginica", "ru": "коллега (ж.)", "cat": "ljudi", "gender": "ж", "plural": "koleginice"}, {"sr": "šef", "ru": "начальник", "cat": "ljudi", "gender": "м", "plural": "šefovi"}, {"sr": "gost", "ru": "гость", "cat": "ljudi", "gender": "м", "plural": "gosti"}, {"sr": "domaćin", "ru": "хозяин", "cat": "ljudi", "gender": "м", "plural": "domaćini"}, {"sr": "domaćica", "ru": "хозяйка", "cat": "ljudi", "gender": "ж", "plural": "domaćice"}, {"sr": "beba", "ru": "младенец", "cat": "ljudi", "gender": "ж", "plural": "bebe"}, {"sr": "dečak", "ru": "мальчик", "cat": "ljudi", "gender": "м", "plural": "dečaci"}, {"sr": "devojčica", "ru": "девочка", "cat": "ljudi", "gender": "ж", "plural": "devojčice"}, {"sr": "čovek", "ru": "человек, мужчина", "cat": "ljudi", "gender": "м", "plural": "ljudi"}, {"sr": "osoba", "ru": "человек (нейтр.)", "cat": "ljudi", "gender": "ж", "plural": "osobe"}, {"sr": "stranac", "ru": "иностранец, незнакомец", "cat": "ljudi", "gender": "м", "plural": "stranci"}, {"sr": "poznanik", "ru": "знакомый", "cat": "ljudi", "gender": "м", "plural": "poznanici"}, {"sr": "učitelj", "ru": "учитель", "cat": "ljudi", "gender": "м", "plural": "učitelji"}, {"sr": "glava", "ru": "голова", "cat": "telo", "gender": "ж", "plural": "glave"}, {"sr": "lice", "ru": "лицо", "cat": "telo", "gender": "с", "plural": "lica"}, {"sr": "oko", "ru": "глаз", "cat": "telo", "gender": "с", "plural": "oči"}, {"sr": "oči", "ru": "глаза", "cat": "telo"}, {"sr": "uvo", "ru": "ухо", "cat": "telo", "gender": "с", "plural": "uši"}, {"sr": "nos", "ru": "нос", "cat": "telo", "gender": "м", "plural": "nosevi"}, {"sr": "usta", "ru": "рот", "cat": "telo", "gender": "с", "plural": null}, {"sr": "zub", "ru": "зуб", "cat": "telo", "gender": "м", "plural": "zubi"}, {"sr": "jezik", "ru": "язык (орган)", "cat": "telo", "gender": "м", "plural": "jezici"}, {"sr": "vrat", "ru": "шея", "cat": "telo", "gender": "м", "plural": "vratovi"}, {"sr": "rame", "ru": "плечо", "cat": "telo", "gender": "с", "plural": "ramena"}, {"sr": "ruka", "ru": "рука", "cat": "telo", "gender": "ж", "plural": "ruke"}, {"sr": "šaka", "ru": "кисть руки", "cat": "telo", "gender": "ж", "plural": "šake"}, {"sr": "prst", "ru": "палец", "cat": "telo", "gender": "м", "plural": "prsti"}, {"sr": "noga", "ru": "нога", "cat": "telo", "gender": "ж", "plural": "noge"}, {"sr": "stopalo", "ru": "стопа", "cat": "telo", "gender": "с", "plural": "stopala"}, {"sr": "koleno", "ru": "колено", "cat": "telo", "gender": "с", "plural": "kolena"}, {"sr": "leđa", "ru": "спина", "cat": "telo", "gender": "с", "plural": null}, {"sr": "stomak", "ru": "живот", "cat": "telo", "gender": "м", "plural": "stomaci"}, {"sr": "srce", "ru": "сердце", "cat": "telo", "gender": "с", "plural": "srca"}, {"sr": "kosa", "ru": "волосы", "cat": "telo", "gender": "ж", "plural": "kose"}, {"sr": "koža", "ru": "кожа", "cat": "telo", "gender": "ж", "plural": "kože"}, {"sr": "telo", "ru": "тело", "cat": "telo", "gender": "с", "plural": "tela"}, {"sr": "zdravlje", "ru": "здоровье", "cat": "telo", "gender": "с", "plural": null}, {"sr": "bolestan", "ru": "больной", "cat": "telo"}, {"sr": "zdrav", "ru": "здоровый", "cat": "telo"}, {"sr": "bol", "ru": "боль", "cat": "telo", "gender": "м", "plural": "bolovi"}, {"sr": "groznica", "ru": "жар, лихорадка", "cat": "telo", "gender": "ж", "plural": "groznice"}, {"sr": "kašalj", "ru": "кашель", "cat": "telo", "gender": "м", "plural": "kašljevi"}, {"sr": "prehlada", "ru": "простуда", "cat": "telo", "gender": "ж", "plural": "prehlade"}, {"sr": "lek", "ru": "лекарство", "cat": "telo", "gender": "м", "plural": "lekovi"}, {"sr": "doktor", "ru": "доктор", "cat": "telo", "gender": "м", "plural": "doktori"}, {"sr": "apoteka", "ru": "аптека", "cat": "telo", "gender": "ж", "plural": "apoteke"}, {"sr": "umoran", "ru": "уставший", "cat": "telo"}, {"sr": "odmor", "ru": "отдых", "cat": "telo", "gender": "м", "plural": "odmori"}, {"sr": "disati", "ru": "дышать", "cat": "telo"}, {"sr": "odeća", "ru": "одежда", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "košulja", "ru": "рубашка", "cat": "odeca", "gender": "ж", "plural": "košulje"}, {"sr": "majica", "ru": "футболка", "cat": "odeca", "gender": "ж", "plural": "majice"}, {"sr": "pantalone", "ru": "брюки", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "farmerke", "ru": "джинсы", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "suknja", "ru": "юбка", "cat": "odeca", "gender": "ж", "plural": "suknje"}, {"sr": "haljina", "ru": "платье", "cat": "odeca", "gender": "ж", "plural": "haljine"}, {"sr": "jakna", "ru": "куртка", "cat": "odeca", "gender": "ж", "plural": "jakne"}, {"sr": "kaput", "ru": "пальто", "cat": "odeca", "gender": "м", "plural": "kaputi"}, {"sr": "džemper", "ru": "свитер", "cat": "odeca", "gender": "м", "plural": "džemperi"}, {"sr": "cipele", "ru": "туфли, обувь", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "čizme", "ru": "сапоги", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "patike", "ru": "кроссовки", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "čarape", "ru": "носки", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "kapa", "ru": "шапка", "cat": "odeca", "gender": "ж", "plural": "kape"}, {"sr": "šešir", "ru": "шляпа", "cat": "odeca", "gender": "м", "plural": "šeširi"}, {"sr": "šal", "ru": "шарф", "cat": "odeca", "gender": "м", "plural": "šalovi"}, {"sr": "rukavice", "ru": "перчатки", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "kaiš", "ru": "ремень", "cat": "odeca", "gender": "м", "plural": "kaiševi"}, {"sr": "naočare", "ru": "очки", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "torba", "ru": "сумка", "cat": "odeca", "gender": "ж", "plural": "torbe"}, {"sr": "novčanik", "ru": "кошелёк", "cat": "odeca", "gender": "м", "plural": "novčanici"}, {"sr": "ručni sat", "ru": "наручные часы", "cat": "odeca", "gender": "м", "plural": "ručni satovi"}, {"sr": "prsten", "ru": "кольцо", "cat": "odeca", "gender": "м", "plural": "prsteni"}, {"sr": "minđuše", "ru": "серьги", "cat": "odeca", "gender": "ж", "plural": null}, {"sr": "ogrlica", "ru": "ожерелье", "cat": "odeca", "gender": "ж", "plural": "ogrlice"}, {"sr": "veš", "ru": "бельё", "cat": "odeca", "gender": "м", "plural": null}, {"sr": "pidžama", "ru": "пижама", "cat": "odeca", "gender": "ж", "plural": "pidžame"}, {"sr": "kišobran", "ru": "зонт", "cat": "odeca", "gender": "м", "plural": "kišobrani"}, {"sr": "kuća", "ru": "дом", "cat": "kuca", "gender": "ж", "plural": "kuće"}, {"sr": "stan", "ru": "квартира", "cat": "kuca", "gender": "м", "plural": "stanovi"}, {"sr": "vrata", "ru": "дверь", "cat": "kuca", "gender": "с", "plural": null}, {"sr": "prozor", "ru": "окно", "cat": "kuca", "gender": "м", "plural": "prozori"}, {"sr": "sto", "ru": "стол", "cat": "kuca", "gender": "м", "plural": "stolovi"}, {"sr": "stolica", "ru": "стул", "cat": "kuca", "gender": "ж", "plural": "stolice"}, {"sr": "krevet", "ru": "кровать", "cat": "kuca", "gender": "м", "plural": "kreveti"}, {"sr": "soba", "ru": "комната", "cat": "kuca", "gender": "ж", "plural": "sobe"}, {"sr": "kuhinja", "ru": "кухня", "cat": "kuca", "gender": "ж", "plural": "kuhinje"}, {"sr": "kupatilo", "ru": "ванная", "cat": "kuca", "gender": "с", "plural": "kupatila"}, {"sr": "dnevna soba", "ru": "гостиная", "cat": "kuca", "gender": "ж", "plural": "dnevna sobe"}, {"sr": "spavaća soba", "ru": "спальня", "cat": "kuca", "gender": "ж", "plural": "spavaća sobe"}, {"sr": "plakar", "ru": "шкаф", "cat": "kuca", "gender": "м", "plural": "plakari"}, {"sr": "fotelja", "ru": "кресло", "cat": "kuca", "gender": "ж", "plural": "fotelje"}, {"sr": "tepih", "ru": "ковёр", "cat": "kuca", "gender": "м", "plural": "tepisi"}, {"sr": "lampa", "ru": "лампа", "cat": "kuca", "gender": "ж", "plural": "lampe"}, {"sr": "ogledalo", "ru": "зеркало", "cat": "kuca", "gender": "с", "plural": "ogledala"}, {"sr": "frižider", "ru": "холодильник", "cat": "kuca", "gender": "м", "plural": "frižideri"}, {"sr": "šporet", "ru": "плита", "cat": "kuca", "gender": "м", "plural": "šporeti"}, {"sr": "mikrotalasna", "ru": "микроволновка", "cat": "kuca", "gender": "ж", "plural": "mikrotalasne"}, {"sr": "mašina za veš", "ru": "стиральная машина", "cat": "kuca", "gender": "м", "plural": null}, {"sr": "sudopera", "ru": "раковина", "cat": "kuca", "gender": "ж", "plural": "sudopere"}, {"sr": "tuš", "ru": "душ", "cat": "kuca", "gender": "м", "plural": "tuševi"}, {"sr": "kada", "ru": "ванна (ёмкость)", "cat": "kuca", "gender": "ж", "plural": "kade"}, {"sr": "česma", "ru": "кран", "cat": "kuca", "gender": "ж", "plural": "česme"}, {"sr": "ključ", "ru": "ключ", "cat": "kuca", "gender": "м", "plural": "ključevi"}, {"sr": "brava", "ru": "замок (дверной)", "cat": "kuca", "gender": "ж", "plural": "brave"}, {"sr": "balkon", "ru": "балкон", "cat": "kuca", "gender": "м", "plural": "balkoni"}, {"sr": "dvorište", "ru": "двор", "cat": "kuca", "gender": "с", "plural": "dvorišta"}, {"sr": "krov", "ru": "крыша", "cat": "kuca", "gender": "м", "plural": "krovovi"}, {"sr": "zid", "ru": "стена", "cat": "kuca", "gender": "м", "plural": "zidovi"}, {"sr": "pod", "ru": "пол", "cat": "kuca", "gender": "м", "plural": "podovi"}, {"sr": "plafon", "ru": "потолок", "cat": "kuca", "gender": "м", "plural": "plafoni"}, {"sr": "struja", "ru": "электричество", "cat": "kuca", "gender": "ж", "plural": null}, {"sr": "grejanje", "ru": "отопление", "cat": "kuca", "gender": "с", "plural": null}, {"sr": "voda", "ru": "вода", "cat": "hrana", "gender": "ж", "plural": "vode"}, {"sr": "hrana", "ru": "еда", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "hleb", "ru": "хлеб", "cat": "hrana", "gender": "м", "plural": "hlebovi"}, {"sr": "mleko", "ru": "молоко", "cat": "hrana", "gender": "с", "plural": null}, {"sr": "kafa", "ru": "кофе", "cat": "hrana", "gender": "ж", "plural": "kafe"}, {"sr": "voće", "ru": "фрукты", "cat": "hrana", "gender": "с", "plural": null}, {"sr": "povrće", "ru": "овощи", "cat": "hrana", "gender": "с", "plural": null}, {"sr": "meso", "ru": "мясо", "cat": "hrana", "gender": "с", "plural": null}, {"sr": "piće", "ru": "напиток", "cat": "hrana", "gender": "с", "plural": "pića"}, {"sr": "jaje", "ru": "яйцо", "cat": "hrana", "gender": "с", "plural": "jaja"}, {"sr": "sir", "ru": "сыр", "cat": "hrana", "gender": "м", "plural": "sirevi"}, {"sr": "pavlaka", "ru": "сметана", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "šećer", "ru": "сахар", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "so", "ru": "соль", "cat": "hrana", "gender": "ж", "plural": "soli"}, {"sr": "biber", "ru": "перец", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "ulje", "ru": "масло (растительное)", "cat": "hrana", "gender": "с", "plural": "ulja"}, {"sr": "pirinač", "ru": "рис", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "testenina", "ru": "макароны", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "krompir", "ru": "картофель", "cat": "hrana", "gender": "м", "plural": "krompiri"}, {"sr": "paradajz", "ru": "помидор", "cat": "hrana", "gender": "м", "plural": "paradajzi"}, {"sr": "krastavac", "ru": "огурец", "cat": "hrana", "gender": "м", "plural": "krastavci"}, {"sr": "luk", "ru": "лук", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "beli luk", "ru": "чеснок", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "jabuka", "ru": "яблоко", "cat": "hrana", "gender": "ж", "plural": "jabuke"}, {"sr": "banana", "ru": "банан", "cat": "hrana", "gender": "ж", "plural": "banane"}, {"sr": "pomorandža", "ru": "апельсин", "cat": "hrana", "gender": "ж", "plural": "pomorandže"}, {"sr": "limun", "ru": "лимон", "cat": "hrana", "gender": "м", "plural": "limunovi"}, {"sr": "grožđe", "ru": "виноград", "cat": "hrana", "gender": "с", "plural": null}, {"sr": "lubenica", "ru": "арбуз", "cat": "hrana", "gender": "ж", "plural": "lubenice"}, {"sr": "jagoda", "ru": "клубника", "cat": "hrana", "gender": "ж", "plural": "jagode"}, {"sr": "riba", "ru": "рыба", "cat": "hrana", "gender": "ж", "plural": "ribe"}, {"sr": "piletina", "ru": "курица (мясо)", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "svinjetina", "ru": "свинина", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "govedina", "ru": "говядина", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "kolač", "ru": "торт, пирог", "cat": "hrana", "gender": "м", "plural": "kolači"}, {"sr": "čokolada", "ru": "шоколад", "cat": "hrana", "gender": "ж", "plural": null}, {"sr": "sladoled", "ru": "мороженое", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "med", "ru": "мёд", "cat": "hrana", "gender": "м", "plural": null}, {"sr": "supa", "ru": "суп", "cat": "hrana", "gender": "ж", "plural": "supe"}, {"sr": "salata", "ru": "салат", "cat": "hrana", "gender": "ж", "plural": "salate"}, {"sr": "sendvič", "ru": "сэндвич", "cat": "hrana", "gender": "м", "plural": "sendviči"}, {"sr": "pica", "ru": "пицца", "cat": "hrana", "gender": "ж", "plural": "pice"}, {"sr": "čaj", "ru": "чай", "cat": "hrana", "gender": "м", "plural": "čajevi"}, {"sr": "sok", "ru": "сок", "cat": "hrana", "gender": "м", "plural": "sokovi"}, {"sr": "pivo", "ru": "пиво", "cat": "hrana", "gender": "с", "plural": "piva"}, {"sr": "vino", "ru": "вино", "cat": "hrana", "gender": "с", "plural": "vina"}, {"sr": "škola", "ru": "школа", "cat": "grad", "gender": "ж", "plural": "škole"}, {"sr": "grad", "ru": "город", "cat": "grad", "gender": "м", "plural": "gradovi"}, {"sr": "ulica", "ru": "улица", "cat": "grad", "gender": "ж", "plural": "ulice"}, {"sr": "pijaca", "ru": "рынок", "cat": "grad", "gender": "ж", "plural": "pijace"}, {"sr": "prodavnica", "ru": "магазин", "cat": "grad", "gender": "ж", "plural": "prodavnice"}, {"sr": "pekara", "ru": "булочная", "cat": "grad", "gender": "ж", "plural": "pekare"}, {"sr": "bolnica", "ru": "больница", "cat": "grad", "gender": "ж", "plural": "bolnice"}, {"sr": "stanica", "ru": "станция", "cat": "grad", "gender": "ж", "plural": "stanice"}, {"sr": "park", "ru": "парк", "cat": "grad", "gender": "м", "plural": "parkovi"}, {"sr": "trg", "ru": "площадь", "cat": "grad", "gender": "м", "plural": "trgovi"}, {"sr": "crkva", "ru": "церковь", "cat": "grad", "gender": "ж", "plural": "crkve"}, {"sr": "muzej", "ru": "музей", "cat": "grad", "gender": "м", "plural": "muzeji"}, {"sr": "pozorište", "ru": "театр", "cat": "grad", "gender": "с", "plural": "pozorišta"}, {"sr": "bioskop", "ru": "кинотеатр", "cat": "grad", "gender": "м", "plural": "bioskopi"}, {"sr": "restoran", "ru": "ресторан", "cat": "grad", "gender": "м", "plural": "restorani"}, {"sr": "kafić", "ru": "кафе", "cat": "grad", "gender": "м", "plural": "kafići"}, {"sr": "hotel", "ru": "отель", "cat": "grad", "gender": "м", "plural": "hoteli"}, {"sr": "banka", "ru": "банк", "cat": "grad", "gender": "ж", "plural": "banke"}, {"sr": "pošta", "ru": "почта", "cat": "grad", "gender": "ж", "plural": "pošte"}, {"sr": "biblioteka", "ru": "библиотека", "cat": "grad", "gender": "ж", "plural": "biblioteke"}, {"sr": "fakultet", "ru": "факультет", "cat": "grad", "gender": "м", "plural": "fakulteti"}, {"sr": "univerzitet", "ru": "университет", "cat": "grad", "gender": "м", "plural": "univerziteti"}, {"sr": "groblje", "ru": "кладбище", "cat": "grad", "gender": "с", "plural": "groblja"}, {"sr": "most", "ru": "мост", "cat": "grad", "gender": "м", "plural": "mostovi"}, {"sr": "zgrada", "ru": "здание", "cat": "grad", "gender": "ж", "plural": "zgrade"}, {"sr": "ambasada", "ru": "посольство", "cat": "grad", "gender": "ж", "plural": "ambasade"}, {"sr": "policija", "ru": "полиция", "cat": "grad", "gender": "ж", "plural": null}, {"sr": "vatrogasci", "ru": "пожарные", "cat": "grad", "gender": "м", "plural": null}, {"sr": "tržni centar", "ru": "торговый центр", "cat": "grad", "gender": "м", "plural": "tržni centri"}, {"sr": "auto", "ru": "машина", "cat": "transport", "gender": "м", "plural": "auti"}, {"sr": "aerodrom", "ru": "аэропорт", "cat": "transport", "gender": "м", "plural": "aerodromi"}, {"sr": "autobus", "ru": "автобус", "cat": "transport", "gender": "м", "plural": "autobusi"}, {"sr": "voz", "ru": "поезд", "cat": "transport", "gender": "м", "plural": "vozovi"}, {"sr": "tramvaj", "ru": "трамвай", "cat": "transport", "gender": "м", "plural": "tramvaji"}, {"sr": "trolejbus", "ru": "троллейбус", "cat": "transport", "gender": "м", "plural": "trolejbusi"}, {"sr": "taksi", "ru": "такси", "cat": "transport", "gender": "м", "plural": "taksiji"}, {"sr": "bicikl", "ru": "велосипед", "cat": "transport", "gender": "м", "plural": "bicikli"}, {"sr": "motor", "ru": "мотоцикл", "cat": "transport", "gender": "м", "plural": "motori"}, {"sr": "avion", "ru": "самолёт", "cat": "transport", "gender": "м", "plural": "avioni"}, {"sr": "brod", "ru": "корабль", "cat": "transport", "gender": "м", "plural": "brodovi"}, {"sr": "metro", "ru": "метро", "cat": "transport", "gender": "м", "plural": null}, {"sr": "vozač", "ru": "водитель", "cat": "transport", "gender": "м", "plural": "vozači"}, {"sr": "karta", "ru": "билет", "cat": "transport", "gender": "ж", "plural": "karte"}, {"sr": "vožnja", "ru": "поездка", "cat": "transport", "gender": "ж", "plural": "vožnje"}, {"sr": "parking", "ru": "парковка", "cat": "transport", "gender": "м", "plural": "parkinzi"}, {"sr": "saobraćaj", "ru": "движение, трафик", "cat": "transport", "gender": "м", "plural": null}, {"sr": "semafor", "ru": "светофор", "cat": "transport", "gender": "м", "plural": "semafori"}, {"sr": "pešak", "ru": "пешеход", "cat": "transport", "gender": "м", "plural": "pešaci"}, {"sr": "put", "ru": "дорога, путь", "cat": "transport", "gender": "м", "plural": "putevi"}, {"sr": "raskrsnica", "ru": "перекрёсток", "cat": "transport", "gender": "ж", "plural": "raskrsnice"}, {"sr": "pasoš", "ru": "паспорт", "cat": "transport", "gender": "м", "plural": "pasoši"}, {"sr": "viza", "ru": "виза", "cat": "transport", "gender": "ж", "plural": "vize"}, {"sr": "let", "ru": "рейс, полёт", "cat": "transport", "gender": "м", "plural": "letovi"}, {"sr": "kofer", "ru": "чемодан", "cat": "transport", "gender": "м", "plural": "koferi"}, {"sr": "prtljag", "ru": "багаж", "cat": "transport", "gender": "м", "plural": null}, {"sr": "sedište", "ru": "сиденье", "cat": "transport", "gender": "с", "plural": "sedišta"}, {"sr": "pojas", "ru": "ремень безопасности", "cat": "transport", "gender": "м", "plural": "pojasevi"}, {"sr": "brzina", "ru": "скорость", "cat": "transport", "gender": "ж", "plural": "brzine"}, {"sr": "gorivo", "ru": "топливо", "cat": "transport", "gender": "с", "plural": null}, {"sr": "benzinska pumpa", "ru": "заправка", "cat": "transport", "gender": "ж", "plural": "benzinska pumpe"}, {"sr": "reka", "ru": "река", "cat": "priroda", "gender": "ж", "plural": "reke"}, {"sr": "drvo", "ru": "дерево", "cat": "priroda", "gender": "с", "plural": "drveta"}, {"sr": "cvet", "ru": "цветок", "cat": "priroda", "gender": "м", "plural": "cvetovi"}, {"sr": "trava", "ru": "трава", "cat": "priroda", "gender": "ж", "plural": "trave"}, {"sr": "šuma", "ru": "лес", "cat": "priroda", "gender": "ж", "plural": "šume"}, {"sr": "planina", "ru": "гора", "cat": "priroda", "gender": "ж", "plural": "planine"}, {"sr": "more", "ru": "море", "cat": "priroda", "gender": "с", "plural": "mora"}, {"sr": "jezero", "ru": "озеро", "cat": "priroda", "gender": "с", "plural": "jezera"}, {"sr": "ostrvo", "ru": "остров", "cat": "priroda", "gender": "с", "plural": "ostrva"}, {"sr": "nebo", "ru": "небо", "cat": "priroda", "gender": "с", "plural": "nebesa"}, {"sr": "sunce", "ru": "солнце", "cat": "priroda", "gender": "с", "plural": "sunca"}, {"sr": "mesec", "ru": "луна, месяц", "cat": "priroda", "gender": "м", "plural": "meseci"}, {"sr": "zvezda", "ru": "звезда", "cat": "priroda", "gender": "ж", "plural": "zvezde"}, {"sr": "zemlja", "ru": "земля, страна", "cat": "priroda", "gender": "ж", "plural": "zemlje"}, {"sr": "kamen", "ru": "камень", "cat": "priroda", "gender": "м", "plural": "kamenje"}, {"sr": "pesak", "ru": "песок", "cat": "priroda", "gender": "м", "plural": "pesci"}, {"sr": "list", "ru": "лист", "cat": "priroda", "gender": "м", "plural": "listovi"}, {"sr": "koren", "ru": "корень", "cat": "priroda", "gender": "м", "plural": "koreni"}, {"sr": "pas", "ru": "собака", "cat": "priroda", "gender": "м", "plural": "psi"}, {"sr": "mačka", "ru": "кошка", "cat": "priroda", "gender": "ж", "plural": "mačke"}, {"sr": "ptica", "ru": "птица", "cat": "priroda", "gender": "ж", "plural": "ptice"}, {"sr": "konj", "ru": "лошадь", "cat": "priroda", "gender": "м", "plural": "konji"}, {"sr": "krava", "ru": "корова", "cat": "priroda", "gender": "ж", "plural": "krave"}, {"sr": "ovca", "ru": "овца", "cat": "priroda", "gender": "ж", "plural": "ovce"}, {"sr": "svinja", "ru": "свинья", "cat": "priroda", "gender": "ж", "plural": "svinje"}, {"sr": "koza", "ru": "коза", "cat": "priroda", "gender": "ж", "plural": "koze"}, {"sr": "zec", "ru": "заяц", "cat": "priroda", "gender": "м", "plural": "zečevi"}, {"sr": "miš", "ru": "мышь", "cat": "priroda", "gender": "м", "plural": "miševi"}, {"sr": "medved", "ru": "медведь", "cat": "priroda", "gender": "м", "plural": "medvedi"}, {"sr": "vuk", "ru": "волк", "cat": "priroda", "gender": "м", "plural": "vukovi"}, {"sr": "lisica", "ru": "лиса", "cat": "priroda", "gender": "ж", "plural": "lisice"}, {"sr": "slon", "ru": "слон", "cat": "priroda", "gender": "м", "plural": "slonovi"}, {"sr": "lav", "ru": "лев", "cat": "priroda", "gender": "м", "plural": "lavovi"}, {"sr": "majmun", "ru": "обезьяна", "cat": "priroda", "gender": "м", "plural": "majmuni"}, {"sr": "žaba", "ru": "лягушка", "cat": "priroda", "gender": "ж", "plural": "žabe"}, {"sr": "zmija", "ru": "змея", "cat": "priroda", "gender": "ж", "plural": "zmije"}, {"sr": "pčela", "ru": "пчела", "cat": "priroda", "gender": "ж", "plural": "pčele"}, {"sr": "leptir", "ru": "бабочка", "cat": "priroda", "gender": "м", "plural": "leptiri"}, {"sr": "vreme", "ru": "время, погода", "cat": "vreme", "gender": "с", "plural": "vremena"}, {"sr": "dan", "ru": "день", "cat": "vreme", "gender": "м", "plural": "dani"}, {"sr": "noć", "ru": "ночь", "cat": "vreme", "gender": "ж", "plural": "noći"}, {"sr": "godina", "ru": "год", "cat": "vreme", "gender": "ж", "plural": "godine"}, {"sr": "sat", "ru": "час, часы", "cat": "vreme", "gender": "м", "plural": "sati"}, {"sr": "danas", "ru": "сегодня", "cat": "vreme"}, {"sr": "sutra", "ru": "завтра", "cat": "vreme"}, {"sr": "juče", "ru": "вчера", "cat": "vreme"}, {"sr": "sada", "ru": "сейчас", "cat": "vreme"}, {"sr": "uvek", "ru": "всегда", "cat": "vreme"}, {"sr": "nikada", "ru": "никогда", "cat": "vreme"}, {"sr": "ponekad", "ru": "иногда", "cat": "vreme"}, {"sr": "rano", "ru": "рано", "cat": "vreme"}, {"sr": "kasno", "ru": "поздно", "cat": "vreme"}, {"sr": "ponedeljak", "ru": "понедельник", "cat": "vreme", "gender": "м", "plural": "ponedeljci"}, {"sr": "utorak", "ru": "вторник", "cat": "vreme", "gender": "м", "plural": "utorci"}, {"sr": "sreda", "ru": "среда", "cat": "vreme", "gender": "ж", "plural": "srede"}, {"sr": "četvrtak", "ru": "четверг", "cat": "vreme", "gender": "м", "plural": "četvrtci"}, {"sr": "petak", "ru": "пятница", "cat": "vreme", "gender": "м", "plural": "petci"}, {"sr": "subota", "ru": "суббота", "cat": "vreme", "gender": "ж", "plural": "subote"}, {"sr": "nedelja", "ru": "воскресенье / неделя", "cat": "vreme", "gender": "ж", "plural": "nedelje"}, {"sr": "jutro", "ru": "утро", "cat": "vreme", "gender": "с", "plural": "jutra"}, {"sr": "podne", "ru": "полдень", "cat": "vreme", "gender": "с", "plural": null}, {"sr": "popodne", "ru": "день (после полудня)", "cat": "vreme", "gender": "с", "plural": null}, {"sr": "veče", "ru": "вечер", "cat": "vreme", "gender": "с", "plural": "večeri"}, {"sr": "ponoć", "ru": "полночь", "cat": "vreme", "gender": "ж", "plural": null}, {"sr": "vikend", "ru": "выходные", "cat": "vreme", "gender": "м", "plural": "vikendi"}, {"sr": "praznik", "ru": "праздник", "cat": "vreme", "gender": "м", "plural": "praznici"}, {"sr": "rođendan", "ru": "день рождения", "cat": "vreme", "gender": "м", "plural": "rođendani"}, {"sr": "jedan", "ru": "один", "cat": "brojevi"}, {"sr": "dva", "ru": "два", "cat": "brojevi"}, {"sr": "tri", "ru": "три", "cat": "brojevi"}, {"sr": "četiri", "ru": "четыре", "cat": "brojevi"}, {"sr": "pet", "ru": "пять", "cat": "brojevi"}, {"sr": "šest", "ru": "шесть", "cat": "brojevi"}, {"sr": "sedam", "ru": "семь", "cat": "brojevi"}, {"sr": "osam", "ru": "восемь", "cat": "brojevi"}, {"sr": "devet", "ru": "девять", "cat": "brojevi"}, {"sr": "deset", "ru": "десять", "cat": "brojevi"}, {"sr": "mnogo", "ru": "много", "cat": "brojevi"}, {"sr": "malo", "ru": "мало", "cat": "brojevi"}, {"sr": "jedanaest", "ru": "одиннадцать", "cat": "brojevi"}, {"sr": "dvanaest", "ru": "двенадцать", "cat": "brojevi"}, {"sr": "dvadeset", "ru": "двадцать", "cat": "brojevi"}, {"sr": "trideset", "ru": "тридцать", "cat": "brojevi"}, {"sr": "pedeset", "ru": "пятьдесят", "cat": "brojevi"}, {"sr": "hiljada", "ru": "тысяча", "cat": "brojevi"}, {"sr": "prvi", "ru": "первый", "cat": "brojevi"}, {"sr": "drugi", "ru": "второй", "cat": "brojevi"}, {"sr": "treći", "ru": "третий", "cat": "brojevi"}, {"sr": "poslednji", "ru": "последний", "cat": "brojevi"}, {"sr": "par", "ru": "пара", "cat": "brojevi"}, {"sr": "nekoliko", "ru": "несколько", "cat": "brojevi"}, {"sr": "pola", "ru": "половина", "cat": "brojevi"}, {"sr": "dvostruko", "ru": "вдвое", "cat": "brojevi"}, {"sr": "posao", "ru": "работа", "cat": "posao", "gender": "м", "plural": "poslovi"}, {"sr": "knjiga", "ru": "книга", "cat": "posao", "gender": "ж", "plural": "knjige"}, {"sr": "kancelarija", "ru": "офис", "cat": "posao", "gender": "ж", "plural": "kancelarije"}, {"sr": "sastanak", "ru": "встреча, собрание", "cat": "posao", "gender": "м", "plural": "sastanci"}, {"sr": "projekat", "ru": "проект", "cat": "posao", "gender": "м", "plural": "projekti"}, {"sr": "zadatak", "ru": "задача", "cat": "posao", "gender": "м", "plural": "zadaci"}, {"sr": "rok", "ru": "срок, дедлайн", "cat": "posao", "gender": "м", "plural": "rokovi"}, {"sr": "plata", "ru": "зарплата", "cat": "posao", "gender": "ж", "plural": "plate"}, {"sr": "ugovor", "ru": "договор", "cat": "posao", "gender": "м", "plural": "ugovori"}, {"sr": "intervju", "ru": "собеседование", "cat": "posao", "gender": "м", "plural": "intervjui"}, {"sr": "iskustvo", "ru": "опыт", "cat": "posao", "gender": "с", "plural": "iskustva"}, {"sr": "veština", "ru": "навык", "cat": "posao", "gender": "ж", "plural": "veštine"}, {"sr": "ocena", "ru": "оценка", "cat": "posao", "gender": "ж", "plural": "ocene"}, {"sr": "ispit", "ru": "экзамен", "cat": "posao", "gender": "м", "plural": "ispiti"}, {"sr": "čas", "ru": "урок", "cat": "posao", "gender": "м", "plural": "časovi"}, {"sr": "predavanje", "ru": "лекция", "cat": "posao", "gender": "с", "plural": "predavanja"}, {"sr": "domaći zadatak", "ru": "домашнее задание", "cat": "posao", "gender": "м", "plural": "domaći zadaci"}, {"sr": "razred", "ru": "класс (в школе)", "cat": "posao", "gender": "м", "plural": "razredi"}, {"sr": "student", "ru": "студент", "cat": "posao", "gender": "м", "plural": "studenti"}, {"sr": "studentkinja", "ru": "студентка", "cat": "posao", "gender": "ж", "plural": "studentkinje"}, {"sr": "profesor", "ru": "профессор, преподаватель", "cat": "posao", "gender": "м", "plural": "profesori"}, {"sr": "profesorka", "ru": "преподавательница", "cat": "posao", "gender": "ж", "plural": "profesorke"}, {"sr": "direktor", "ru": "директор", "cat": "posao", "gender": "м", "plural": "direktori"}, {"sr": "firma", "ru": "фирма", "cat": "posao", "gender": "ж", "plural": "firme"}, {"sr": "kompanija", "ru": "компания", "cat": "posao", "gender": "ж", "plural": "kompanije"}, {"sr": "tim", "ru": "команда", "cat": "posao", "gender": "м", "plural": "timovi"}, {"sr": "klijent", "ru": "клиент", "cat": "posao", "gender": "м", "plural": "klijenti"}, {"sr": "izveštaj", "ru": "отчёт", "cat": "posao", "gender": "м", "plural": "izveštaji"}, {"sr": "olovka", "ru": "карандаш", "cat": "posao", "gender": "ж", "plural": "olovke"}, {"sr": "sveska", "ru": "тетрадь", "cat": "posao", "gender": "ж", "plural": "sveske"}, {"sr": "tabla", "ru": "доска", "cat": "posao", "gender": "ж", "plural": "table"}, {"sr": "srećan", "ru": "счастливый", "cat": "emocije"}, {"sr": "tužan", "ru": "грустный", "cat": "emocije"}, {"sr": "ljut", "ru": "злой, сердитый", "cat": "emocije"}, {"sr": "uplašen", "ru": "напуганный", "cat": "emocije"}, {"sr": "iznenađen", "ru": "удивлённый", "cat": "emocije"}, {"sr": "uzbuđen", "ru": "взволнованный, возбуждённый", "cat": "emocije"}, {"sr": "nervozan", "ru": "нервный", "cat": "emocije"}, {"sr": "miran", "ru": "спокойный", "cat": "emocije"}, {"sr": "zadovoljan", "ru": "довольный", "cat": "emocije"}, {"sr": "razočaran", "ru": "разочарованный", "cat": "emocije"}, {"sr": "ponosan", "ru": "гордый", "cat": "emocije"}, {"sr": "zabrinut", "ru": "обеспокоенный", "cat": "emocije"}, {"sr": "usamljen", "ru": "одинокий", "cat": "emocije"}, {"sr": "ljubomoran", "ru": "ревнивый", "cat": "emocije"}, {"sr": "zahvalan", "ru": "благодарный", "cat": "emocije"}, {"sr": "strpljiv", "ru": "терпеливый", "cat": "emocije"}, {"sr": "nestrpljiv", "ru": "нетерпеливый", "cat": "emocije"}, {"sr": "hrabar", "ru": "смелый", "cat": "emocije"}, {"sr": "plašljiv", "ru": "трусливый", "cat": "emocije"}, {"sr": "ljubazan", "ru": "любезный, вежливый", "cat": "emocije"}, {"sr": "grub", "ru": "грубый", "cat": "emocije"}, {"sr": "pošten", "ru": "честный", "cat": "emocije"}, {"sr": "lažljiv", "ru": "лживый", "cat": "emocije"}, {"sr": "velikodušan", "ru": "великодушный", "cat": "emocije"}, {"sr": "sebičan", "ru": "эгоистичный", "cat": "emocije"}, {"sr": "lenj", "ru": "ленивый", "cat": "emocije"}, {"sr": "vredan", "ru": "трудолюбивый", "cat": "emocije"}, {"sr": "pametan", "ru": "умный", "cat": "emocije"}, {"sr": "glup", "ru": "глупый", "cat": "emocije"}, {"sr": "radoznao", "ru": "любопытный", "cat": "emocije"}, {"sr": "smiren", "ru": "невозмутимый", "cat": "emocije"}, {"sr": "očajan", "ru": "отчаявшийся", "cat": "emocije"}, {"sr": "tvrdoglav", "ru": "упрямый", "cat": "emocije"}, {"sr": "skroman", "ru": "скромный", "cat": "emocije"}, {"sr": "samouveren", "ru": "уверенный в себе", "cat": "emocije"}, {"sr": "videti", "ru": "видеть", "cat": "glagoli"}, {"sr": "čuti", "ru": "слышать", "cat": "glagoli"}, {"sr": "osećati", "ru": "чувствовать", "cat": "glagoli"}, {"sr": "verovati", "ru": "верить", "cat": "glagoli"}, {"sr": "razumeti", "ru": "понимать", "cat": "glagoli"}, {"sr": "sećati se", "ru": "помнить, вспоминать", "cat": "glagoli"}, {"sr": "zaboraviti", "ru": "забыть", "cat": "glagoli"}, {"sr": "pomoći", "ru": "помочь", "cat": "glagoli"}, {"sr": "davati", "ru": "давать", "cat": "glagoli"}, {"sr": "uzimati", "ru": "брать", "cat": "glagoli"}, {"sr": "donositi", "ru": "приносить", "cat": "glagoli"}, {"sr": "odnositi", "ru": "уносить", "cat": "glagoli"}, {"sr": "stavljati", "ru": "класть, ставить", "cat": "glagoli"}, {"sr": "otvarati", "ru": "открывать", "cat": "glagoli"}, {"sr": "zatvarati", "ru": "закрывать", "cat": "glagoli"}, {"sr": "počinjati", "ru": "начинать", "cat": "glagoli"}, {"sr": "završavati", "ru": "заканчивать", "cat": "glagoli"}, {"sr": "nastaviti", "ru": "продолжить", "cat": "glagoli"}, {"sr": "zaustaviti", "ru": "остановить", "cat": "glagoli"}, {"sr": "menjati", "ru": "менять", "cat": "glagoli"}, {"sr": "praviti", "ru": "делать, изготавливать", "cat": "glagoli"}, {"sr": "graditi", "ru": "строить", "cat": "glagoli"}, {"sr": "kvariti", "ru": "портить", "cat": "glagoli"}, {"sr": "popravljati", "ru": "чинить", "cat": "glagoli"}, {"sr": "prati", "ru": "мыть, стирать", "cat": "glagoli"}, {"sr": "čistiti", "ru": "убирать, чистить", "cat": "glagoli"}, {"sr": "crtati", "ru": "рисовать", "cat": "glagoli"}, {"sr": "plesati", "ru": "танцевать", "cat": "glagoli"}, {"sr": "smejati se", "ru": "смеяться", "cat": "glagoli"}, {"sr": "plakati", "ru": "плакать", "cat": "glagoli"}, {"sr": "vikati", "ru": "кричать", "cat": "glagoli"}, {"sr": "šaputati", "ru": "шептать", "cat": "glagoli"}, {"sr": "pokazivati", "ru": "показывать", "cat": "glagoli"}, {"sr": "objašnjavati", "ru": "объяснять", "cat": "glagoli"}, {"sr": "pitati se", "ru": "спрашивать себя, интересоваться", "cat": "glagoli"}, {"sr": "odlučivati", "ru": "решать", "cat": "glagoli"}, {"sr": "birati", "ru": "выбирать", "cat": "glagoli"}, {"sr": "pokušavati", "ru": "пытаться", "cat": "glagoli"}, {"sr": "uspevati", "ru": "получаться, преуспевать", "cat": "glagoli"}, {"sr": "gubiti", "ru": "терять", "cat": "glagoli"}, {"sr": "nalaziti", "ru": "находить", "cat": "glagoli"}, {"sr": "veliki", "ru": "большой", "cat": "pridevi"}, {"sr": "mali", "ru": "маленький", "cat": "pridevi"}, {"sr": "dobar", "ru": "хороший", "cat": "pridevi"}, {"sr": "loš", "ru": "плохой", "cat": "pridevi"}, {"sr": "lep", "ru": "красивый", "cat": "pridevi"}, {"sr": "nov", "ru": "новый", "cat": "pridevi"}, {"sr": "star", "ru": "старый", "cat": "pridevi"}, {"sr": "brz", "ru": "быстрый", "cat": "pridevi"}, {"sr": "spor", "ru": "медленный", "cat": "pridevi"}, {"sr": "topao", "ru": "тёплый", "cat": "pridevi"}, {"sr": "hladan", "ru": "холодный", "cat": "pridevi"}, {"sr": "skup", "ru": "дорогой", "cat": "pridevi"}, {"sr": "jeftin", "ru": "дешёвый", "cat": "pridevi"}, {"sr": "lak", "ru": "лёгкий", "cat": "pridevi"}, {"sr": "težak", "ru": "тяжёлый, трудный", "cat": "pridevi"}, {"sr": "dugačak", "ru": "длинный", "cat": "pridevi"}, {"sr": "kratak", "ru": "короткий", "cat": "pridevi"}, {"sr": "visok", "ru": "высокий", "cat": "pridevi"}, {"sr": "nizak", "ru": "низкий (о росте)", "cat": "pridevi"}, {"sr": "debeo", "ru": "толстый", "cat": "pridevi"}, {"sr": "mršav", "ru": "худой", "cat": "pridevi"}, {"sr": "širok", "ru": "широкий", "cat": "pridevi"}, {"sr": "uzak", "ru": "узкий", "cat": "pridevi"}, {"sr": "čist", "ru": "чистый", "cat": "pridevi"}, {"sr": "prljav", "ru": "грязный", "cat": "pridevi"}, {"sr": "pun", "ru": "полный", "cat": "pridevi"}, {"sr": "prazan", "ru": "пустой", "cat": "pridevi"}, {"sr": "otvoren", "ru": "открытый", "cat": "pridevi"}, {"sr": "zatvoren", "ru": "закрытый", "cat": "pridevi"}, {"sr": "tih", "ru": "тихий", "cat": "pridevi"}, {"sr": "glasan", "ru": "громкий", "cat": "pridevi"}, {"sr": "jak", "ru": "сильный", "cat": "pridevi"}, {"sr": "slab", "ru": "слабый", "cat": "pridevi"}, {"sr": "mlad", "ru": "молодой", "cat": "pridevi"}, {"sr": "ozbiljan", "ru": "серьёзный", "cat": "pridevi"}, {"sr": "smešan", "ru": "смешной", "cat": "pridevi"}, {"sr": "zanimljiv", "ru": "интересный", "cat": "pridevi"}, {"sr": "dosadan", "ru": "скучный", "cat": "pridevi"}, {"sr": "važan", "ru": "важный", "cat": "pridevi"}, {"sr": "poznat", "ru": "известный", "cat": "pridevi"}, {"sr": "putovanje", "ru": "путешествие", "cat": "putovanja", "gender": "с", "plural": "putovanja"}, {"sr": "godišnji odmor", "ru": "отпуск", "cat": "putovanja", "gender": "м", "plural": "godišnji odmori"}, {"sr": "rezervacija", "ru": "бронирование", "cat": "putovanja", "gender": "ж", "plural": "rezervacije"}, {"sr": "smeštaj", "ru": "жильё, размещение", "cat": "putovanja", "gender": "м", "plural": null}, {"sr": "hostel", "ru": "хостел", "cat": "putovanja", "gender": "м", "plural": "hosteli"}, {"sr": "kamp", "ru": "кемпинг", "cat": "putovanja", "gender": "м", "plural": "kampovi"}, {"sr": "šator", "ru": "палатка", "cat": "putovanja", "gender": "м", "plural": "šatori"}, {"sr": "mapa", "ru": "карта (географическая)", "cat": "putovanja", "gender": "ж", "plural": "mape"}, {"sr": "kompas", "ru": "компас", "cat": "putovanja", "gender": "м", "plural": "kompasi"}, {"sr": "ruksak", "ru": "рюкзак", "cat": "putovanja", "gender": "м", "plural": "ruksaci"}, {"sr": "suvenir", "ru": "сувенир", "cat": "putovanja", "gender": "м", "plural": "suveniri"}, {"sr": "znamenitost", "ru": "достопримечательность", "cat": "putovanja", "gender": "ж", "plural": "znamenitosti"}, {"sr": "izlet", "ru": "экскурсия", "cat": "putovanja", "gender": "м", "plural": "izleti"}, {"sr": "plaža", "ru": "пляж", "cat": "putovanja", "gender": "ж", "plural": "plaže"}, {"sr": "sunčanje", "ru": "загорание", "cat": "putovanja", "gender": "с", "plural": null}, {"sr": "kupanje", "ru": "купание", "cat": "putovanja", "gender": "с", "plural": null}, {"sr": "vodič", "ru": "гид, путеводитель", "cat": "putovanja", "gender": "м", "plural": "vodiči"}, {"sr": "turista", "ru": "турист", "cat": "putovanja", "gender": "м", "plural": "turiste"}, {"sr": "granica", "ru": "граница", "cat": "putovanja", "gender": "ж", "plural": "granice"}, {"sr": "carina", "ru": "таможня", "cat": "putovanja", "gender": "ж", "plural": null}, {"sr": "avantura", "ru": "приключение", "cat": "putovanja", "gender": "ж", "plural": "avanture"}, {"sr": "recepcija", "ru": "ресепшн", "cat": "putovanja", "gender": "ж", "plural": "recepcije"}, {"sr": "prijava", "ru": "заселение (check-in)", "cat": "putovanja", "gender": "ж", "plural": "prijave"}, {"sr": "odjava", "ru": "выселение (check-out)", "cat": "putovanja", "gender": "ж", "plural": "odjave"}, {"sr": "razglednica", "ru": "открытка", "cat": "putovanja", "gender": "ж", "plural": "razglednice"}, {"sr": "foto-aparat", "ru": "фотоаппарат", "cat": "putovanja", "gender": "м", "plural": "foto-aparati"}, {"sr": "kupovina", "ru": "покупка", "cat": "kupovina", "gender": "ж", "plural": null}, {"sr": "cena", "ru": "цена", "cat": "kupovina", "gender": "ж", "plural": "cene"}, {"sr": "popust", "ru": "скидка", "cat": "kupovina", "gender": "м", "plural": "popusti"}, {"sr": "akcija", "ru": "акция, распродажа", "cat": "kupovina", "gender": "ж", "plural": "akcije"}, {"sr": "kasa", "ru": "касса", "cat": "kupovina", "gender": "ж", "plural": "kase"}, {"sr": "račun", "ru": "чек, счёт", "cat": "kupovina", "gender": "м", "plural": "računi"}, {"sr": "gotovina", "ru": "наличные", "cat": "kupovina", "gender": "ж", "plural": null}, {"sr": "kartica", "ru": "карта (банковская)", "cat": "kupovina", "gender": "ж", "plural": "kartice"}, {"sr": "novčić", "ru": "монета", "cat": "kupovina", "gender": "м", "plural": "novčići"}, {"sr": "novčanica", "ru": "купюра", "cat": "kupovina", "gender": "ж", "plural": "novčanice"}, {"sr": "kusur", "ru": "сдача", "cat": "kupovina", "gender": "м", "plural": null}, {"sr": "veličina", "ru": "размер", "cat": "kupovina", "gender": "ж", "plural": "veličine"}, {"sr": "boja", "ru": "цвет", "cat": "kupovina", "gender": "ж", "plural": "boje"}, {"sr": "probna kabina", "ru": "примерочная", "cat": "kupovina", "gender": "ж", "plural": "probna kabine"}, {"sr": "prodavac", "ru": "продавец", "cat": "kupovina", "gender": "м", "plural": "prodavci"}, {"sr": "prodavačica", "ru": "продавщица", "cat": "kupovina", "gender": "ж", "plural": "prodavačice"}, {"sr": "kupac", "ru": "покупатель", "cat": "kupovina", "gender": "м", "plural": "kupci"}, {"sr": "korpa", "ru": "корзина", "cat": "kupovina", "gender": "ж", "plural": "korpe"}, {"sr": "kolica", "ru": "тележка", "cat": "kupovina", "gender": "с", "plural": null}, {"sr": "polica", "ru": "полка", "cat": "kupovina", "gender": "ж", "plural": "police"}, {"sr": "etiketa", "ru": "этикетка", "cat": "kupovina", "gender": "ж", "plural": "etikete"}, {"sr": "garancija", "ru": "гарантия", "cat": "kupovina", "gender": "ж", "plural": "garancije"}, {"sr": "povraćaj", "ru": "возврат (товара)", "cat": "kupovina", "gender": "м", "plural": "povraćaji"}, {"sr": "poklon", "ru": "подарок", "cat": "kupovina", "gender": "м", "plural": "pokloni"}, {"sr": "kesa", "ru": "пакет", "cat": "kupovina", "gender": "ж", "plural": "kese"}, {"sr": "online kupovina", "ru": "онлайн-покупки", "cat": "kupovina", "gender": "ж", "plural": null}, {"sr": "dostava", "ru": "доставка", "cat": "kupovina", "gender": "ж", "plural": null}, {"sr": "telefon", "ru": "телефон", "cat": "tehnologije", "gender": "м", "plural": "telefoni"}, {"sr": "kompjuter", "ru": "компьютер", "cat": "tehnologije", "gender": "м", "plural": "kompjuteri"}, {"sr": "laptop", "ru": "ноутбук", "cat": "tehnologije", "gender": "м", "plural": "laptopovi"}, {"sr": "tablet", "ru": "планшет", "cat": "tehnologije", "gender": "м", "plural": "tableti"}, {"sr": "internet", "ru": "интернет", "cat": "tehnologije", "gender": "м", "plural": null}, {"sr": "imejl", "ru": "электронная почта", "cat": "tehnologije", "gender": "м", "plural": "imejlovi"}, {"sr": "lozinka", "ru": "пароль", "cat": "tehnologije", "gender": "ж", "plural": "lozinke"}, {"sr": "aplikacija", "ru": "приложение", "cat": "tehnologije", "gender": "ж", "plural": "aplikacije"}, {"sr": "ekran", "ru": "экран", "cat": "tehnologije", "gender": "м", "plural": "ekrani"}, {"sr": "tastatura", "ru": "клавиатура", "cat": "tehnologije", "gender": "ж", "plural": "tastature"}, {"sr": "kompjuterski miš", "ru": "компьютерная мышь", "cat": "tehnologije", "gender": "м", "plural": "kompjuterski miševi"}, {"sr": "štampač", "ru": "принтер", "cat": "tehnologije", "gender": "м", "plural": "štampači"}, {"sr": "kamera", "ru": "камера", "cat": "tehnologije", "gender": "ж", "plural": "kamere"}, {"sr": "slušalice", "ru": "наушники", "cat": "tehnologije", "gender": "ж", "plural": null}, {"sr": "punjač", "ru": "зарядное устройство", "cat": "tehnologije", "gender": "м", "plural": "punjači"}, {"sr": "baterija", "ru": "батарея, аккумулятор", "cat": "tehnologije", "gender": "ж", "plural": "baterije"}, {"sr": "mreža", "ru": "сеть", "cat": "tehnologije", "gender": "ж", "plural": "mreže"}, {"sr": "podaci", "ru": "данные", "cat": "tehnologije", "gender": "м", "plural": null}, {"sr": "fajl", "ru": "файл", "cat": "tehnologije", "gender": "м", "plural": "fajlovi"}, {"sr": "fascikla", "ru": "папка", "cat": "tehnologije", "gender": "ж", "plural": "fascikle"}, {"sr": "preuzimanje", "ru": "скачивание", "cat": "tehnologije", "gender": "с", "plural": "preuzimanja"}, {"sr": "otpremanje", "ru": "загрузка (upload)", "cat": "tehnologije", "gender": "с", "plural": "otpremanja"}, {"sr": "softver", "ru": "программное обеспечение", "cat": "tehnologije", "gender": "м", "plural": null}, {"sr": "hardver", "ru": "аппаратное обеспечение", "cat": "tehnologije", "gender": "м", "plural": null}, {"sr": "virus", "ru": "вирус", "cat": "tehnologije", "gender": "м", "plural": "virusi"}, {"sr": "ažuriranje", "ru": "обновление", "cat": "tehnologije", "gender": "с", "plural": "ažuriranja"}, {"sr": "korisničko ime", "ru": "имя пользователя", "cat": "tehnologije", "gender": "с", "plural": "korisnička imena"}, {"sr": "poruka", "ru": "сообщение", "cat": "tehnologije", "gender": "ж", "plural": "poruke"}, {"sr": "poziv", "ru": "звонок", "cat": "tehnologije", "gender": "м", "plural": "pozivi"}, {"sr": "video poziv", "ru": "видеозвонок", "cat": "tehnologije", "gender": "м", "plural": "video pozivi"}, {"sr": "društvene mreže", "ru": "социальные сети", "cat": "tehnologije", "gender": "ж", "plural": null}, {"sr": "veb-sajt", "ru": "веб-сайт", "cat": "tehnologije", "gender": "м", "plural": "veb-sajtovi"}, {"sr": "pretraživač", "ru": "браузер, поисковик", "cat": "tehnologije", "gender": "м", "plural": "pretraživači"}, {"sr": "sport", "ru": "спорт", "cat": "sport", "gender": "м", "plural": "sportovi"}, {"sr": "fudbal", "ru": "футбол", "cat": "sport", "gender": "м", "plural": null}, {"sr": "košarka", "ru": "баскетбол", "cat": "sport", "gender": "ж", "plural": null}, {"sr": "odbojka", "ru": "волейбол", "cat": "sport", "gender": "ж", "plural": null}, {"sr": "tenis", "ru": "теннис", "cat": "sport", "gender": "м", "plural": null}, {"sr": "plivanje", "ru": "плавание", "cat": "sport", "gender": "с", "plural": null}, {"sr": "trčanje", "ru": "бег", "cat": "sport", "gender": "с", "plural": null}, {"sr": "biciklizam", "ru": "велоспорт", "cat": "sport", "gender": "м", "plural": null}, {"sr": "skijanje", "ru": "лыжи (спорт)", "cat": "sport", "gender": "с", "plural": null}, {"sr": "teretana", "ru": "спортзал", "cat": "sport", "gender": "ж", "plural": "teretane"}, {"sr": "trening", "ru": "тренировка", "cat": "sport", "gender": "м", "plural": "treninzi"}, {"sr": "utakmica", "ru": "матч", "cat": "sport", "gender": "ж", "plural": "utakmice"}, {"sr": "reprezentacija", "ru": "сборная", "cat": "sport", "gender": "ж", "plural": "reprezentacije"}, {"sr": "pobeda", "ru": "победа", "cat": "sport", "gender": "ж", "plural": "pobede"}, {"sr": "poraz", "ru": "поражение", "cat": "sport", "gender": "м", "plural": "porazi"}, {"sr": "nerešeno", "ru": "ничья", "cat": "sport", "gender": "с", "plural": null}, {"sr": "gol", "ru": "гол", "cat": "sport", "gender": "м", "plural": "golovi"}, {"sr": "lopta", "ru": "мяч", "cat": "sport", "gender": "ж", "plural": "lopte"}, {"sr": "teren", "ru": "поле, площадка", "cat": "sport", "gender": "м", "plural": "tereni"}, {"sr": "sudija", "ru": "судья", "cat": "sport", "gender": "м", "plural": "sudije"}, {"sr": "navijač", "ru": "болельщик", "cat": "sport", "gender": "м", "plural": "navijači"}, {"sr": "trener", "ru": "тренер", "cat": "sport", "gender": "м", "plural": "treneri"}, {"sr": "rekord", "ru": "рекорд", "cat": "sport", "gender": "м", "plural": "rekordi"}, {"sr": "medalja", "ru": "медаль", "cat": "sport", "gender": "ж", "plural": "medalje"}, {"sr": "prvenstvo", "ru": "чемпионат", "cat": "sport", "gender": "с", "plural": "prvenstva"}, {"sr": "takmičenje", "ru": "соревнование", "cat": "sport", "gender": "с", "plural": "takmičenja"}, {"sr": "vežba", "ru": "упражнение", "cat": "sport", "gender": "ж", "plural": "vežbe"}, {"sr": "snaga", "ru": "сила", "cat": "sport", "gender": "ж", "plural": null}, {"sr": "izdržljivost", "ru": "выносливость", "cat": "sport", "gender": "ж", "plural": null}, {"sr": "hobi", "ru": "хобби", "cat": "sport", "gender": "м", "plural": "hobiji"}, {"sr": "imati", "ru": "иметь", "cat": "glagoli"}, {"sr": "znati", "ru": "знать", "cat": "glagoli"}, {"sr": "čekati", "ru": "ждать", "cat": "glagoli"}, {"sr": "gledati", "ru": "смотреть", "cat": "glagoli"}, {"sr": "slušati", "ru": "слушать", "cat": "glagoli"}, {"sr": "pitati", "ru": "спрашивать", "cat": "glagoli"}, {"sr": "igrati", "ru": "играть", "cat": "glagoli"}, {"sr": "čitati", "ru": "читать", "cat": "glagoli"}, {"sr": "kuvati", "ru": "готовить (еду)", "cat": "glagoli"}, {"sr": "pevati", "ru": "петь", "cat": "glagoli"}, {"sr": "govoriti", "ru": "говорить", "cat": "glagoli"}, {"sr": "učiti", "ru": "учить / учиться", "cat": "glagoli"}, {"sr": "misliti", "ru": "думать", "cat": "glagoli"}, {"sr": "voleti", "ru": "любить", "cat": "glagoli"}, {"sr": "živeti", "ru": "жить", "cat": "glagoli"}, {"sr": "nositi", "ru": "носить", "cat": "glagoli"}, {"sr": "tražiti", "ru": "искать", "cat": "glagoli"}, {"sr": "raditi", "ru": "работать / делать", "cat": "glagoli"}, {"sr": "ići", "ru": "идти / ходить", "cat": "glagoli"}, {"sr": "pisati", "ru": "писать", "cat": "glagoli"}, {"sr": "jesti", "ru": "есть, кушать", "cat": "glagoli"}, {"sr": "piti", "ru": "пить", "cat": "glagoli"}, {"sr": "moći", "ru": "мочь", "cat": "glagoli"}, {"sr": "hteti", "ru": "хотеть", "cat": "glagoli"}, {"sr": "biti", "ru": "быть", "cat": "glagoli"}, {"sr": "kupovati", "ru": "покупать", "cat": "glagoli"}, {"sr": "putovati", "ru": "путешествовать", "cat": "glagoli"}];
+
+const VERBS = [{"inf": "imati", "ru": "иметь", "group": "-am", "pres": {"ja": "imam", "ti": "imaš", "on": "ima", "mi": "imamo", "vi": "imate", "oni": "imaju"}, "ru_pres": {"ja": "имею", "ti": "имеешь", "on": "имеет", "mi": "имеем", "vi": "имеете", "oni": "имеют"}, "ph": [{"sr": "novu kuću", "ru": "новый дом"}, {"sr": "dovoljno vremena", "ru": "достаточно времени"}, {"sr": "puno posla", "ru": "много работы"}], "past_masc": {"sg": "imao", "pl": "imali", "fem_sg": "imala", "fem_pl": "imale"}, "past": {"ja": "sam imao/imala", "ti": "si imao/imala", "on": "je imao/imala", "mi": "smo imali/imale", "vi": "ste imali/imale", "oni": "su imali/imale"}, "ru_past": {"ja": "имел/имела", "ti": "имел/имела", "on": "имел/имела", "mi": "имели", "vi": "имели", "oni": "имели"}, "fut": {"ja": "ću imati", "ti": "ćeš imati", "on": "će imati", "mi": "ćemo imati", "vi": "ćete imati", "oni": "će imati"}, "ru_fut": {"ja": "буду иметь", "ti": "будешь иметь", "on": "будет иметь", "mi": "будем иметь", "vi": "будете иметь", "oni": "будут иметь"}, "past_fem": {"sg": "imala", "pl": "imale"}}, {"inf": "znati", "ru": "знать", "group": "-am", "pres": {"ja": "znam", "ti": "znaš", "on": "zna", "mi": "znamo", "vi": "znate", "oni": "znaju"}, "ru_pres": {"ja": "знаю", "ti": "знаешь", "on": "знает", "mi": "знаем", "vi": "знаете", "oni": "знают"}, "ph": [{"sr": "odgovor", "ru": "ответ"}, {"sr": "istinu", "ru": "правду"}, {"sr": "tvoje ime", "ru": "твоё имя"}], "past_masc": {"sg": "znao", "pl": "znali", "fem_sg": "znala", "fem_pl": "znale"}, "past": {"ja": "sam znao/znala", "ti": "si znao/znala", "on": "je znao/znala", "mi": "smo znali/znale", "vi": "ste znali/znale", "oni": "su znali/znale"}, "ru_past": {"ja": "знал/знала", "ti": "знал/знала", "on": "знал/знала", "mi": "знали", "vi": "знали", "oni": "знали"}, "fut": {"ja": "ću znati", "ti": "ćeš znati", "on": "će znati", "mi": "ćemo znati", "vi": "ćete znati", "oni": "će znati"}, "ru_fut": {"ja": "буду знать", "ti": "будешь знать", "on": "будет знать", "mi": "будем знать", "vi": "будете знать", "oni": "будут знать"}, "past_fem": {"sg": "znala", "pl": "znale"}}, {"inf": "čekati", "ru": "ждать", "group": "-am", "pres": {"ja": "čekam", "ti": "čekaš", "on": "čeka", "mi": "čekamo", "vi": "čekate", "oni": "čekaju"}, "ru_pres": {"ja": "жду", "ti": "ждёшь", "on": "ждёт", "mi": "ждём", "vi": "ждёте", "oni": "ждут"}, "ph": [{"sr": "autobus", "ru": "автобус"}, {"sr": "prijatelja", "ru": "друга"}, {"sr": "red", "ru": "очередь"}], "past_masc": {"sg": "čekao", "pl": "čekali", "fem_sg": "čekala", "fem_pl": "čekale"}, "past": {"ja": "sam čekao/čekala", "ti": "si čekao/čekala", "on": "je čekao/čekala", "mi": "smo čekali/čekale", "vi": "ste čekali/čekale", "oni": "su čekali/čekale"}, "ru_past": {"ja": "ждал/ждала", "ti": "ждал/ждала", "on": "ждал/ждала", "mi": "ждали", "vi": "ждали", "oni": "ждали"}, "fut": {"ja": "ću čekati", "ti": "ćeš čekati", "on": "će čekati", "mi": "ćemo čekati", "vi": "ćete čekati", "oni": "će čekati"}, "ru_fut": {"ja": "буду ждать", "ti": "будешь ждать", "on": "будет ждать", "mi": "будем ждать", "vi": "будете ждать", "oni": "будут ждать"}, "past_fem": {"sg": "čekala", "pl": "čekale"}}, {"inf": "gledati", "ru": "смотреть", "group": "-am", "pres": {"ja": "gledam", "ti": "gledaš", "on": "gleda", "mi": "gledamo", "vi": "gledate", "oni": "gledaju"}, "ru_pres": {"ja": "смотрю", "ti": "смотришь", "on": "смотрит", "mi": "смотрим", "vi": "смотрите", "oni": "смотрят"}, "ph": [{"sr": "film", "ru": "фильм"}, {"sr": "televiziju", "ru": "телевизор"}, {"sr": "utakmicu", "ru": "матч"}], "past_masc": {"sg": "gledao", "pl": "gledali", "fem_sg": "gledala", "fem_pl": "gledale"}, "past": {"ja": "sam gledao/gledala", "ti": "si gledao/gledala", "on": "je gledao/gledala", "mi": "smo gledali/gledale", "vi": "ste gledali/gledale", "oni": "su gledali/gledale"}, "ru_past": {"ja": "смотрел/смотрела", "ti": "смотрел/смотрела", "on": "смотрел/смотрела", "mi": "смотрели", "vi": "смотрели", "oni": "смотрели"}, "fut": {"ja": "ću gledati", "ti": "ćeš gledati", "on": "će gledati", "mi": "ćemo gledati", "vi": "ćete gledati", "oni": "će gledati"}, "ru_fut": {"ja": "буду смотреть", "ti": "будешь смотреть", "on": "будет смотреть", "mi": "будем смотреть", "vi": "будете смотреть", "oni": "будут смотреть"}, "past_fem": {"sg": "gledala", "pl": "gledale"}}, {"inf": "slušati", "ru": "слушать", "group": "-am", "pres": {"ja": "slušam", "ti": "slušaš", "on": "sluša", "mi": "slušamo", "vi": "slušate", "oni": "slušaju"}, "ru_pres": {"ja": "слушаю", "ti": "слушаешь", "on": "слушает", "mi": "слушаем", "vi": "слушаете", "oni": "слушают"}, "ph": [{"sr": "muziku", "ru": "музыку"}, {"sr": "radio", "ru": "радио"}, {"sr": "učitelja", "ru": "учителя"}], "past_masc": {"sg": "slušao", "pl": "slušali", "fem_sg": "slušala", "fem_pl": "slušale"}, "past": {"ja": "sam slušao/slušala", "ti": "si slušao/slušala", "on": "je slušao/slušala", "mi": "smo slušali/slušale", "vi": "ste slušali/slušale", "oni": "su slušali/slušale"}, "ru_past": {"ja": "слушал/слушала", "ti": "слушал/слушала", "on": "слушал/слушала", "mi": "слушали", "vi": "слушали", "oni": "слушали"}, "fut": {"ja": "ću slušati", "ti": "ćeš slušati", "on": "će slušati", "mi": "ćemo slušati", "vi": "ćete slušati", "oni": "će slušati"}, "ru_fut": {"ja": "буду слушать", "ti": "будешь слушать", "on": "будет слушать", "mi": "будем слушать", "vi": "будете слушать", "oni": "будут слушать"}, "past_fem": {"sg": "slušala", "pl": "slušale"}}, {"inf": "pitati", "ru": "спрашивать", "group": "-am", "pres": {"ja": "pitam", "ti": "pitaš", "on": "pita", "mi": "pitamo", "vi": "pitate", "oni": "pitaju"}, "ru_pres": {"ja": "спрашиваю", "ti": "спрашиваешь", "on": "спрашивает", "mi": "спрашиваем", "vi": "спрашиваете", "oni": "спрашивают"}, "ph": [{"sr": "prodavca", "ru": "продавца"}, {"sr": "majku", "ru": "маму"}, {"sr": "nešto važno", "ru": "что-то важное"}], "past_masc": {"sg": "pitao", "pl": "pitali", "fem_sg": "pitala", "fem_pl": "pitale"}, "past": {"ja": "sam pitao/pitala", "ti": "si pitao/pitala", "on": "je pitao/pitala", "mi": "smo pitali/pitale", "vi": "ste pitali/pitale", "oni": "su pitali/pitale"}, "ru_past": {"ja": "спрашивал/спрашивала", "ti": "спрашивал/спрашивала", "on": "спрашивал/спрашивала", "mi": "спрашивали", "vi": "спрашивали", "oni": "спрашивали"}, "fut": {"ja": "ću pitati", "ti": "ćeš pitati", "on": "će pitati", "mi": "ćemo pitati", "vi": "ćete pitati", "oni": "će pitati"}, "ru_fut": {"ja": "буду спрашивать", "ti": "будешь спрашивать", "on": "будет спрашивать", "mi": "будем спрашивать", "vi": "будете спрашивать", "oni": "будут спрашивать"}, "past_fem": {"sg": "pitala", "pl": "pitale"}}, {"inf": "igrati", "ru": "играть", "group": "-am", "pres": {"ja": "igram", "ti": "igraš", "on": "igra", "mi": "igramo", "vi": "igrate", "oni": "igraju"}, "ru_pres": {"ja": "играю", "ti": "играешь", "on": "играет", "mi": "играем", "vi": "играете", "oni": "играют"}, "ph": [{"sr": "fudbal", "ru": "в футбол"}, {"sr": "šah", "ru": "в шахматы"}, {"sr": "igre", "ru": "в игры"}], "past_masc": {"sg": "igrao", "pl": "igrali", "fem_sg": "igrala", "fem_pl": "igrale"}, "past": {"ja": "sam igrao/igrala", "ti": "si igrao/igrala", "on": "je igrao/igrala", "mi": "smo igrali/igrale", "vi": "ste igrali/igrale", "oni": "su igrali/igrale"}, "ru_past": {"ja": "играл/играла", "ti": "играл/играла", "on": "играл/играла", "mi": "играли", "vi": "играли", "oni": "играли"}, "fut": {"ja": "ću igrati", "ti": "ćeš igrati", "on": "će igrati", "mi": "ćemo igrati", "vi": "ćete igrati", "oni": "će igrati"}, "ru_fut": {"ja": "буду играть", "ti": "будешь играть", "on": "будет играть", "mi": "будем играть", "vi": "будете играть", "oni": "будут играть"}, "past_fem": {"sg": "igrala", "pl": "igrale"}}, {"inf": "čitati", "ru": "читать", "group": "-am", "pres": {"ja": "čitam", "ti": "čitaš", "on": "čita", "mi": "čitamo", "vi": "čitate", "oni": "čitaju"}, "ru_pres": {"ja": "читаю", "ti": "читаешь", "on": "читает", "mi": "читаем", "vi": "читаете", "oni": "читают"}, "ph": [{"sr": "knjigu", "ru": "книгу"}, {"sr": "novine", "ru": "газеты"}, {"sr": "poruku", "ru": "сообщение"}], "past_masc": {"sg": "čitao", "pl": "čitali", "fem_sg": "čitala", "fem_pl": "čitale"}, "past": {"ja": "sam čitao/čitala", "ti": "si čitao/čitala", "on": "je čitao/čitala", "mi": "smo čitali/čitale", "vi": "ste čitali/čitale", "oni": "su čitali/čitale"}, "ru_past": {"ja": "читал/читала", "ti": "читал/читала", "on": "читал/читала", "mi": "читали", "vi": "читали", "oni": "читали"}, "fut": {"ja": "ću čitati", "ti": "ćeš čitati", "on": "će čitati", "mi": "ćemo čitati", "vi": "ćete čitati", "oni": "će čitati"}, "ru_fut": {"ja": "буду читать", "ti": "будешь читать", "on": "будет читать", "mi": "будем читать", "vi": "будете читать", "oni": "будут читать"}, "past_fem": {"sg": "čitala", "pl": "čitale"}}, {"inf": "kuvati", "ru": "готовить (еду)", "group": "-am", "pres": {"ja": "kuvam", "ti": "kuvaš", "on": "kuva", "mi": "kuvamo", "vi": "kuvate", "oni": "kuvaju"}, "ru_pres": {"ja": "готовлю", "ti": "готовишь", "on": "готовит", "mi": "готовим", "vi": "готовите", "oni": "готовят"}, "ph": [{"sr": "ručak", "ru": "обед"}, {"sr": "večeru", "ru": "ужин"}, {"sr": "kafu", "ru": "кофе"}], "past_masc": {"sg": "kuvao", "pl": "kuvali", "fem_sg": "kuvala", "fem_pl": "kuvale"}, "past": {"ja": "sam kuvao/kuvala", "ti": "si kuvao/kuvala", "on": "je kuvao/kuvala", "mi": "smo kuvali/kuvale", "vi": "ste kuvali/kuvale", "oni": "su kuvali/kuvale"}, "ru_past": {"ja": "готовил/готовила", "ti": "готовил/готовила", "on": "готовил/готовила", "mi": "готовили", "vi": "готовили", "oni": "готовили"}, "fut": {"ja": "ću kuvati", "ti": "ćeš kuvati", "on": "će kuvati", "mi": "ćemo kuvati", "vi": "ćete kuvati", "oni": "će kuvati"}, "ru_fut": {"ja": "буду готовить", "ti": "будешь готовить", "on": "будет готовить", "mi": "будем готовить", "vi": "будете готовить", "oni": "будут готовить"}, "past_fem": {"sg": "kuvala", "pl": "kuvale"}}, {"inf": "pevati", "ru": "петь", "group": "-am", "pres": {"ja": "pevam", "ti": "pevaš", "on": "peva", "mi": "pevamo", "vi": "pevate", "oni": "pevaju"}, "ru_pres": {"ja": "пою", "ti": "поёшь", "on": "поёт", "mi": "поём", "vi": "поёте", "oni": "поют"}, "ph": [{"sr": "staru pesmu", "ru": "старую песню"}, {"sr": "glasno", "ru": "громко"}, {"sr": "u horu", "ru": "в хоре"}], "past_masc": {"sg": "pevao", "pl": "pevali", "fem_sg": "pevala", "fem_pl": "pevale"}, "past": {"ja": "sam pevao/pevala", "ti": "si pevao/pevala", "on": "je pevao/pevala", "mi": "smo pevali/pevale", "vi": "ste pevali/pevale", "oni": "su pevali/pevale"}, "ru_past": {"ja": "пел/пела", "ti": "пел/пела", "on": "пел/пела", "mi": "пели", "vi": "пели", "oni": "пели"}, "fut": {"ja": "ću pevati", "ti": "ćeš pevati", "on": "će pevati", "mi": "ćemo pevati", "vi": "ćete pevati", "oni": "će pevati"}, "ru_fut": {"ja": "буду петь", "ti": "будешь петь", "on": "будет петь", "mi": "будем петь", "vi": "будете петь", "oni": "будут петь"}, "past_fem": {"sg": "pevala", "pl": "pevale"}}, {"inf": "govoriti", "ru": "говорить", "group": "-im", "pres": {"ja": "govorim", "ti": "govoriš", "on": "govori", "mi": "govorimo", "vi": "govorite", "oni": "govore"}, "ru_pres": {"ja": "говорю", "ti": "говоришь", "on": "говорит", "mi": "говорим", "vi": "говорите", "oni": "говорят"}, "ph": [{"sr": "srpski", "ru": "по-сербски"}, {"sr": "istinu", "ru": "правду"}, {"sr": "polako", "ru": "медленно"}], "past_masc": {"sg": "govorio", "pl": "govorili", "fem_sg": "govorila", "fem_pl": "govorile"}, "past": {"ja": "sam govorio/govorila", "ti": "si govorio/govorila", "on": "je govorio/govorila", "mi": "smo govorili/govorile", "vi": "ste govorili/govorile", "oni": "su govorili/govorile"}, "ru_past": {"ja": "говорил/говорила", "ti": "говорил/говорила", "on": "говорил/говорила", "mi": "говорили", "vi": "говорили", "oni": "говорили"}, "fut": {"ja": "ću govoriti", "ti": "ćeš govoriti", "on": "će govoriti", "mi": "ćemo govoriti", "vi": "ćete govoriti", "oni": "će govoriti"}, "ru_fut": {"ja": "буду говорить", "ti": "будешь говорить", "on": "будет говорить", "mi": "будем говорить", "vi": "будете говорить", "oni": "будут говорить"}, "past_fem": {"sg": "govorila", "pl": "govorile"}}, {"inf": "učiti", "ru": "учить / учиться", "group": "-im", "pres": {"ja": "učim", "ti": "učiš", "on": "uči", "mi": "učimo", "vi": "učite", "oni": "uče"}, "ru_pres": {"ja": "учу", "ti": "учишь", "on": "учит", "mi": "учим", "vi": "учите", "oni": "учат"}, "ph": [{"sr": "srpski jezik", "ru": "сербский язык"}, {"sr": "lekciju", "ru": "урок"}, {"sr": "nove reči", "ru": "новые слова"}], "past_masc": {"sg": "učio", "pl": "učili", "fem_sg": "učila", "fem_pl": "učile"}, "past": {"ja": "sam učio/učila", "ti": "si učio/učila", "on": "je učio/učila", "mi": "smo učili/učile", "vi": "ste učili/učile", "oni": "su učili/učile"}, "ru_past": {"ja": "учил/учила", "ti": "учил/учила", "on": "учил/учила", "mi": "учили", "vi": "учили", "oni": "учили"}, "fut": {"ja": "ću učiti", "ti": "ćeš učiti", "on": "će učiti", "mi": "ćemo učiti", "vi": "ćete učiti", "oni": "će učiti"}, "ru_fut": {"ja": "буду учить", "ti": "будешь учить", "on": "будет учить", "mi": "будем учить", "vi": "будете учить", "oni": "будут учить"}, "past_fem": {"sg": "učila", "pl": "učile"}}, {"inf": "misliti", "ru": "думать", "group": "-im", "pres": {"ja": "mislim", "ti": "misliš", "on": "misli", "mi": "mislimo", "vi": "mislite", "oni": "misle"}, "ru_pres": {"ja": "думаю", "ti": "думаешь", "on": "думает", "mi": "думаем", "vi": "думаете", "oni": "думают"}, "ph": [{"sr": "o tome", "ru": "об этом"}, {"sr": "pozitivno", "ru": "позитивно"}, {"sr": "na tebe", "ru": "о тебе"}], "past_masc": {"sg": "mislio", "pl": "mislili", "fem_sg": "mislila", "fem_pl": "mislile"}, "past": {"ja": "sam mislio/mislila", "ti": "si mislio/mislila", "on": "je mislio/mislila", "mi": "smo mislili/mislile", "vi": "ste mislili/mislile", "oni": "su mislili/mislile"}, "ru_past": {"ja": "думал/думала", "ti": "думал/думала", "on": "думал/думала", "mi": "думали", "vi": "думали", "oni": "думали"}, "fut": {"ja": "ću misliti", "ti": "ćeš misliti", "on": "će misliti", "mi": "ćemo misliti", "vi": "ćete misliti", "oni": "će misliti"}, "ru_fut": {"ja": "буду думать", "ti": "будешь думать", "on": "будет думать", "mi": "будем думать", "vi": "будете думать", "oni": "будут думать"}, "past_fem": {"sg": "mislila", "pl": "mislile"}}, {"inf": "voleti", "ru": "любить", "group": "-im", "pres": {"ja": "volim", "ti": "voliš", "on": "voli", "mi": "volimo", "vi": "volite", "oni": "vole"}, "ru_pres": {"ja": "люблю", "ti": "любишь", "on": "любит", "mi": "любим", "vi": "любите", "oni": "любят"}, "ph": [{"sr": "muziku", "ru": "музыку"}, {"sr": "putovanja", "ru": "путешествия"}, {"sr": "kafu ujutru", "ru": "кофе по утрам"}], "past_masc": {"sg": "voleo", "pl": "voleli", "fem_sg": "volela", "fem_pl": "volele"}, "past": {"ja": "sam voleo/volela", "ti": "si voleo/volela", "on": "je voleo/volela", "mi": "smo voleli/volele", "vi": "ste voleli/volele", "oni": "su voleli/volele"}, "ru_past": {"ja": "любил/любила", "ti": "любил/любила", "on": "любил/любила", "mi": "любили", "vi": "любили", "oni": "любили"}, "fut": {"ja": "ću voleti", "ti": "ćeš voleti", "on": "će voleti", "mi": "ćemo voleti", "vi": "ćete voleti", "oni": "će voleti"}, "ru_fut": {"ja": "буду любить", "ti": "будешь любить", "on": "будет любить", "mi": "будем любить", "vi": "будете любить", "oni": "будут любить"}, "past_fem": {"sg": "volela", "pl": "volele"}}, {"inf": "živeti", "ru": "жить", "group": "-im", "pres": {"ja": "živim", "ti": "živiš", "on": "živi", "mi": "živimo", "vi": "živite", "oni": "žive"}, "ru_pres": {"ja": "живу", "ti": "живёшь", "on": "живёт", "mi": "живём", "vi": "живёте", "oni": "живут"}, "ph": [{"sr": "u Beogradu", "ru": "в Белграде"}, {"sr": "mirno", "ru": "спокойно"}, {"sr": "u centru grada", "ru": "в центре города"}], "past_masc": {"sg": "živeo", "pl": "živeli", "fem_sg": "živela", "fem_pl": "živele"}, "past": {"ja": "sam živeo/živela", "ti": "si živeo/živela", "on": "je živeo/živela", "mi": "smo živeli/živele", "vi": "ste živeli/živele", "oni": "su živeli/živele"}, "ru_past": {"ja": "жил/жила", "ti": "жил/жила", "on": "жил/жила", "mi": "жили", "vi": "жили", "oni": "жили"}, "fut": {"ja": "ću živeti", "ti": "ćeš živeti", "on": "će živeti", "mi": "ćemo živeti", "vi": "ćete živeti", "oni": "će živeti"}, "ru_fut": {"ja": "буду жить", "ti": "будешь жить", "on": "будет жить", "mi": "будем жить", "vi": "будете жить", "oni": "будут жить"}, "past_fem": {"sg": "živela", "pl": "živele"}}, {"inf": "nositi", "ru": "носить", "group": "-im", "pres": {"ja": "nosim", "ti": "nosiš", "on": "nosi", "mi": "nosimo", "vi": "nosite", "oni": "nose"}, "ru_pres": {"ja": "ношу", "ti": "носишь", "on": "носит", "mi": "носим", "vi": "носите", "oni": "носят"}, "ph": [{"sr": "torbu", "ru": "сумку"}, {"sr": "novu jaknu", "ru": "новую куртку"}, {"sr": "naočare", "ru": "очки"}], "past_masc": {"sg": "nosio", "pl": "nosili", "fem_sg": "nosila", "fem_pl": "nosile"}, "past": {"ja": "sam nosio/nosila", "ti": "si nosio/nosila", "on": "je nosio/nosila", "mi": "smo nosili/nosile", "vi": "ste nosili/nosile", "oni": "su nosili/nosile"}, "ru_past": {"ja": "носил/носила", "ti": "носил/носила", "on": "носил/носила", "mi": "носили", "vi": "носили", "oni": "носили"}, "fut": {"ja": "ću nositi", "ti": "ćeš nositi", "on": "će nositi", "mi": "ćemo nositi", "vi": "ćete nositi", "oni": "će nositi"}, "ru_fut": {"ja": "буду носить", "ti": "будешь носить", "on": "будет носить", "mi": "будем носить", "vi": "будете носить", "oni": "будут носить"}, "past_fem": {"sg": "nosila", "pl": "nosile"}}, {"inf": "tražiti", "ru": "искать", "group": "-im", "pres": {"ja": "tražim", "ti": "tražiš", "on": "traži", "mi": "tražimo", "vi": "tražite", "oni": "traže"}, "ru_pres": {"ja": "ищу", "ti": "ищешь", "on": "ищет", "mi": "ищем", "vi": "ищете", "oni": "ищут"}, "ph": [{"sr": "posao", "ru": "работу"}, {"sr": "ključeve", "ru": "ключи"}, {"sr": "stan", "ru": "квартиру"}], "past_masc": {"sg": "tražio", "pl": "tražili", "fem_sg": "tražila", "fem_pl": "tražile"}, "past": {"ja": "sam tražio/tražila", "ti": "si tražio/tražila", "on": "je tražio/tražila", "mi": "smo tražili/tražile", "vi": "ste tražili/tražile", "oni": "su tražili/tražile"}, "ru_past": {"ja": "искал/искала", "ti": "искал/искала", "on": "искал/искала", "mi": "искали", "vi": "искали", "oni": "искали"}, "fut": {"ja": "ću tražiti", "ti": "ćeš tražiti", "on": "će tražiti", "mi": "ćemo tražiti", "vi": "ćete tražiti", "oni": "će tražiti"}, "ru_fut": {"ja": "буду искать", "ti": "будешь искать", "on": "будет искать", "mi": "будем искать", "vi": "будете искать", "oni": "будут искать"}, "past_fem": {"sg": "tražila", "pl": "tražile"}}, {"inf": "raditi", "ru": "работать / делать", "group": "-im", "pres": {"ja": "radim", "ti": "radiš", "on": "radi", "mi": "radimo", "vi": "radite", "oni": "rade"}, "ru_pres": {"ja": "работаю", "ti": "работаешь", "on": "работает", "mi": "работаем", "vi": "работаете", "oni": "работают"}, "ph": [{"sr": "svaki dan", "ru": "каждый день"}, {"sr": "u kancelariji", "ru": "в офисе"}, {"sr": "domaći zadatak", "ru": "домашнее задание"}], "past_masc": {"sg": "radio", "pl": "radili", "fem_sg": "radila", "fem_pl": "radile"}, "past": {"ja": "sam radio/radila", "ti": "si radio/radila", "on": "je radio/radila", "mi": "smo radili/radile", "vi": "ste radili/radile", "oni": "su radili/radile"}, "ru_past": {"ja": "работал/работала", "ti": "работал/работала", "on": "работал/работала", "mi": "работали", "vi": "работали", "oni": "работали"}, "fut": {"ja": "ću raditi", "ti": "ćeš raditi", "on": "će raditi", "mi": "ćemo raditi", "vi": "ćete raditi", "oni": "će raditi"}, "ru_fut": {"ja": "буду работать", "ti": "будешь работать", "on": "будет работать", "mi": "будем работать", "vi": "будете работать", "oni": "будут работать"}, "past_fem": {"sg": "radila", "pl": "radile"}}, {"inf": "ići", "ru": "идти / ходить", "group": "nepravilni", "pres": {"ja": "idem", "ti": "ideš", "on": "ide", "mi": "idemo", "vi": "idete", "oni": "idu"}, "ru_pres": {"ja": "иду", "ti": "идёшь", "on": "идёт", "mi": "идём", "vi": "идёте", "oni": "идут"}, "ph": [{"sr": "u pekaru", "ru": "в булочную"}, {"sr": "kući", "ru": "домой"}, {"sr": "u školu", "ru": "в школу"}], "past_masc": {"sg": "išao", "pl": "išli", "fem_sg": "išla", "fem_pl": "išle"}, "past": {"ja": "sam išao/išla", "ti": "si išao/išla", "on": "je išao/išla", "mi": "smo išli/išle", "vi": "ste išli/išle", "oni": "su išli/išle"}, "ru_past": {"ja": "шёл/шла", "ti": "шёл/шла", "on": "шёл/шла", "mi": "шли", "vi": "шли", "oni": "шли"}, "fut": {"ja": "ću ići", "ti": "ćeš ići", "on": "će ići", "mi": "ćemo ići", "vi": "ćete ići", "oni": "će ići"}, "ru_fut": {"ja": "буду идти", "ti": "будешь идти", "on": "будет идти", "mi": "будем идти", "vi": "будете идти", "oni": "будут идти"}, "past_fem": {"sg": "išla", "pl": "išle"}}, {"inf": "pisati", "ru": "писать", "group": "nepravilni", "pres": {"ja": "pišem", "ti": "pišeš", "on": "piše", "mi": "pišemo", "vi": "pišete", "oni": "pišu"}, "ru_pres": {"ja": "пишу", "ti": "пишешь", "on": "пишет", "mi": "пишем", "vi": "пишете", "oni": "пишут"}, "ph": [{"sr": "pismo", "ru": "письмо"}, {"sr": "domaći zadatak", "ru": "домашнее задание"}, {"sr": "poruku", "ru": "сообщение"}], "past_masc": {"sg": "pisao", "pl": "pisali", "fem_sg": "pisala", "fem_pl": "pisale"}, "past": {"ja": "sam pisao/pisala", "ti": "si pisao/pisala", "on": "je pisao/pisala", "mi": "smo pisali/pisale", "vi": "ste pisali/pisale", "oni": "su pisali/pisale"}, "ru_past": {"ja": "писал/писала", "ti": "писал/писала", "on": "писал/писала", "mi": "писали", "vi": "писали", "oni": "писали"}, "fut": {"ja": "ću pisati", "ti": "ćeš pisati", "on": "će pisati", "mi": "ćemo pisati", "vi": "ćete pisati", "oni": "će pisati"}, "ru_fut": {"ja": "буду писать", "ti": "будешь писать", "on": "будет писать", "mi": "будем писать", "vi": "будете писать", "oni": "будут писать"}, "past_fem": {"sg": "pisala", "pl": "pisale"}}, {"inf": "jesti", "ru": "есть, кушать", "group": "nepravilni", "pres": {"ja": "jedem", "ti": "jedeš", "on": "jede", "mi": "jedemo", "vi": "jedete", "oni": "jedu"}, "ru_pres": {"ja": "ем", "ti": "ешь", "on": "ест", "mi": "едим", "vi": "едите", "oni": "едят"}, "ph": [{"sr": "doručak", "ru": "завтрак"}, {"sr": "voće", "ru": "фрукты"}, {"sr": "nešto slatko", "ru": "что-то сладкое"}], "past_masc": {"sg": "jeo", "pl": "jeli", "fem_sg": "jela", "fem_pl": "jele"}, "past": {"ja": "sam jeo/jela", "ti": "si jeo/jela", "on": "je jeo/jela", "mi": "smo jeli/jele", "vi": "ste jeli/jele", "oni": "su jeli/jele"}, "ru_past": {"ja": "ел/ела", "ti": "ел/ела", "on": "ел/ела", "mi": "ели", "vi": "ели", "oni": "ели"}, "fut": {"ja": "ću jesti", "ti": "ćeš jesti", "on": "će jesti", "mi": "ćemo jesti", "vi": "ćete jesti", "oni": "će jesti"}, "ru_fut": {"ja": "буду есть, кушать", "ti": "будешь есть, кушать", "on": "будет есть, кушать", "mi": "будем есть, кушать", "vi": "будете есть, кушать", "oni": "будут есть, кушать"}, "past_fem": {"sg": "jela", "pl": "jele"}}, {"inf": "piti", "ru": "пить", "group": "nepravilni", "pres": {"ja": "pijem", "ti": "piješ", "on": "pije", "mi": "pijemo", "vi": "pijete", "oni": "piju"}, "ru_pres": {"ja": "пью", "ti": "пьёшь", "on": "пьёт", "mi": "пьём", "vi": "пьёте", "oni": "пьют"}, "ph": [{"sr": "kafu ujutru", "ru": "кофе по утрам"}, {"sr": "vodu", "ru": "воду"}, {"sr": "čaj", "ru": "чай"}], "past_masc": {"sg": "pio", "pl": "pili", "fem_sg": "pila", "fem_pl": "pile"}, "past": {"ja": "sam pio/pila", "ti": "si pio/pila", "on": "je pio/pila", "mi": "smo pili/pile", "vi": "ste pili/pile", "oni": "su pili/pile"}, "ru_past": {"ja": "пил/пила", "ti": "пил/пила", "on": "пил/пила", "mi": "пили", "vi": "пили", "oni": "пили"}, "fut": {"ja": "ću piti", "ti": "ćeš piti", "on": "će piti", "mi": "ćemo piti", "vi": "ćete piti", "oni": "će piti"}, "ru_fut": {"ja": "буду пить", "ti": "будешь пить", "on": "будет пить", "mi": "будем пить", "vi": "будете пить", "oni": "будут пить"}, "past_fem": {"sg": "pila", "pl": "pile"}}, {"inf": "moći", "ru": "мочь", "group": "nepravilni", "pres": {"ja": "mogu", "ti": "možeš", "on": "može", "mi": "možemo", "vi": "možete", "oni": "mogu"}, "ru_pres": {"ja": "могу", "ti": "можешь", "on": "может", "mi": "можем", "vi": "можете", "oni": "могут"}, "ph": [{"sr": "to", "ru": "это"}, {"sr": "danas", "ru": "сегодня"}, {"sr": "brzo", "ru": "быстро"}], "past_masc": {"sg": "mogao", "pl": "mogli", "fem_sg": "mogla", "fem_pl": "mogle"}, "past": {"ja": "sam mogao/mogla", "ti": "si mogao/mogla", "on": "je mogao/mogla", "mi": "smo mogli/mogle", "vi": "ste mogli/mogle", "oni": "su mogli/mogle"}, "ru_past": {"ja": "мог/могла", "ti": "мог/могла", "on": "мог/могла", "mi": "могли", "vi": "могли", "oni": "могли"}, "fut": {"ja": "ću moći", "ti": "ćeš moći", "on": "će moći", "mi": "ćemo moći", "vi": "ćete moći", "oni": "će moći"}, "ru_fut": {"ja": "буду мочь", "ti": "будешь мочь", "on": "будет мочь", "mi": "будем мочь", "vi": "будете мочь", "oni": "будут мочь"}, "past_fem": {"sg": "mogla", "pl": "mogle"}}, {"inf": "hteti", "ru": "хотеть", "group": "nepravilni", "pres": {"ja": "hoću", "ti": "hoćeš", "on": "hoće", "mi": "hoćemo", "vi": "hoćete", "oni": "hoće"}, "ru_pres": {"ja": "хочу", "ti": "хочешь", "on": "хочет", "mi": "хотим", "vi": "хотите", "oni": "хотят"}, "ph": [{"sr": "kafu", "ru": "кофе"}, {"sr": "to", "ru": "это"}, {"sr": "malo mira", "ru": "немного покоя"}], "past_masc": {"sg": "hteo", "pl": "hteli", "fem_sg": "htela", "fem_pl": "htele"}, "past": {"ja": "sam hteo/htela", "ti": "si hteo/htela", "on": "je hteo/htela", "mi": "smo hteli/htele", "vi": "ste hteli/htele", "oni": "su hteli/htele"}, "ru_past": {"ja": "хотел/хотела", "ti": "хотел/хотела", "on": "хотел/хотела", "mi": "хотели", "vi": "хотели", "oni": "хотели"}, "fut": {"ja": "ću hteti", "ti": "ćeš hteti", "on": "će hteti", "mi": "ćemo hteti", "vi": "ćete hteti", "oni": "će hteti"}, "ru_fut": {"ja": "буду хотеть", "ti": "будешь хотеть", "on": "будет хотеть", "mi": "будем хотеть", "vi": "будете хотеть", "oni": "будут хотеть"}, "past_fem": {"sg": "htela", "pl": "htele"}}, {"inf": "biti", "ru": "быть", "group": "nepravilni", "pres": {"ja": "sam", "ti": "si", "on": "je", "mi": "smo", "vi": "ste", "oni": "su"}, "ru_pres": {"ja": "", "ti": "", "on": "", "mi": "", "vi": "", "oni": ""}, "ph": [{"sr": "kod kuće", "ru": "дома"}, {"sr": "na poslu", "ru": "на работе"}, {"sr": "spreman", "ru": "готов"}], "past_masc": {"sg": "bio", "pl": "bili", "fem_sg": "bila", "fem_pl": "bile"}, "past": {"ja": "sam bio/bila", "ti": "si bio/bila", "on": "je bio/bila", "mi": "smo bili/bile", "vi": "ste bili/bile", "oni": "su bili/bile"}, "ru_past": {"ja": "был/была", "ti": "был/была", "on": "был/была", "mi": "были", "vi": "были", "oni": "были"}, "fut": {"ja": "ću biti", "ti": "ćeš biti", "on": "će biti", "mi": "ćemo biti", "vi": "ćete biti", "oni": "će biti"}, "ru_fut": {"ja": "буду", "ti": "будешь", "on": "будет", "mi": "будем", "vi": "будете", "oni": "будут"}, "past_fem": {"sg": "bila", "pl": "bile"}}, {"inf": "kupovati", "ru": "покупать", "group": "-ujem", "pres": {"ja": "kupujem", "ti": "kupuješ", "on": "kupuje", "mi": "kupujemo", "vi": "kupujete", "oni": "kupuju"}, "ru_pres": {"ja": "покупаю", "ti": "покупаешь", "on": "покупает", "mi": "покупаем", "vi": "покупаете", "oni": "покупают"}, "ph": [{"sr": "hleb", "ru": "хлеб"}, {"sr": "novu odeću", "ru": "новую одежду"}, {"sr": "poklone", "ru": "подарки"}], "past_masc": {"sg": "kupovao", "pl": "kupovali", "fem_sg": "kupovala", "fem_pl": "kupovale"}, "past": {"ja": "sam kupovao/kupovala", "ti": "si kupovao/kupovala", "on": "je kupovao/kupovala", "mi": "smo kupovali/kupovale", "vi": "ste kupovali/kupovale", "oni": "su kupovali/kupovale"}, "ru_past": {"ja": "покупал/покупала", "ti": "покупал/покупала", "on": "покупал/покупала", "mi": "покупали", "vi": "покупали", "oni": "покупали"}, "fut": {"ja": "ću kupovati", "ti": "ćeš kupovati", "on": "će kupovati", "mi": "ćemo kupovati", "vi": "ćete kupovati", "oni": "će kupovati"}, "ru_fut": {"ja": "буду покупать", "ti": "будешь покупать", "on": "будет покупать", "mi": "будем покупать", "vi": "будете покупать", "oni": "будут покупать"}, "past_fem": {"sg": "kupovala", "pl": "kupovale"}}, {"inf": "putovati", "ru": "путешествовать", "group": "-ujem", "pres": {"ja": "putujem", "ti": "putuješ", "on": "putuje", "mi": "putujemo", "vi": "putujete", "oni": "putuju"}, "ru_pres": {"ja": "путешествую", "ti": "путешествуешь", "on": "путешествует", "mi": "путешествуем", "vi": "путешествуете", "oni": "путешествуют"}, "ph": [{"sr": "u inostranstvo", "ru": "за границу"}, {"sr": "avionom", "ru": "на самолёте"}, {"sr": "svake godine", "ru": "каждый год"}], "past_masc": {"sg": "putovao", "pl": "putovali", "fem_sg": "putovala", "fem_pl": "putovale"}, "past": {"ja": "sam putovao/putovala", "ti": "si putovao/putovala", "on": "je putovao/putovala", "mi": "smo putovali/putovale", "vi": "ste putovali/putovale", "oni": "su putovali/putovale"}, "ru_past": {"ja": "путешествовал/путешествовала", "ti": "путешествовал/путешествовала", "on": "путешествовал/путешествовала", "mi": "путешествовали", "vi": "путешествовали", "oni": "путешествовали"}, "fut": {"ja": "ću putovati", "ti": "ćeš putovati", "on": "će putovati", "mi": "ćemo putovati", "vi": "ćete putovati", "oni": "će putovati"}, "ru_fut": {"ja": "буду путешествовать", "ti": "будешь путешествовать", "on": "будет путешествовать", "mi": "будем путешествовать", "vi": "будете путешествовать", "oni": "будут путешествовать"}, "past_fem": {"sg": "putovala", "pl": "putovale"}}];
+
+
+const PRON = {ja:"Ja",ti:"Ti",on:"On / ona",mi:"Mi",vi:"Vi",oni:"Oni / one"};
+const PKEYS = Object.keys(PRON);
+const RU_PRON = {ja:"Я",ti:"Ты",on:"Он/она",mi:"Мы",vi:"Вы",oni:"Они"};
+const TENSE_LABEL = {present:"наст. время", past:"прош. время", future:"буд. время"};
+const TENSE_UI = [["present","Наст."],["past","Прош."],["future","Буд."],["all","Все"]];
+
+/* ---------------- STORAGE-BACKED STATE ---------------- */
+
+let custom = [];       // [{sr,ru,cat},...]
+let known = {};         // sr -> 'known' | 'learning'
+
+async function loadStore(){
+  try{ const r = await window.storage.get('custom-words-lat-v2', false); custom = r? JSON.parse(r.value): []; }catch(e){ custom=[]; }
+  try{ const r = await window.storage.get('known-status-lat', false); known = r? JSON.parse(r.value): {}; }catch(e){ known={}; }
+}
+async function saveCustom(){ try{ await window.storage.set('custom-words-lat-v2', JSON.stringify(custom), false); }catch(e){} }
+async function saveKnown(){ try{ await window.storage.set('known-status-lat', JSON.stringify(known), false); }catch(e){} }
+
+function allWords(){ return WORDS.concat(custom); }
+
+/* ---------------- APP STATE ---------------- */
+
+const S = {
+  tab:'cards',
+  dir:'sr-ru',        // sr-ru | ru-sr | mixed
+  mode:'scroll',       // scroll | blitz | type
+  filter:'all',         // all | learning
+  selectedTopics: new Set(), // empty = all topics
+  topicsOpen: false,
+  deck:[], di:0, flipped:false, cardDir:'sr-ru',
+  blitz:{q:null, timer:null, tLeft:0, score:0, total:0, answered:false, correct:null},
+  typeCard:{q:null, feedback:null, checked:false},
+  showAdd:false,
+  vMode:'choice', // choice | type
+  tense:'present', // present | past | future | all
+  rulesFor:null,
+  searchMsg:null,
+  vQ:null, vOptions:[], vFeedback:null, vChecked:false, vScore:0, vTotal:0
+};
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+
+function topicPool(){
+  const all = allWords();
+  return S.selectedTopics.size ? all.filter(w=>S.selectedTopics.has(w.cat)) : all;
+}
+
+function buildDeck(){
+  let pool = topicPool();
+  if(S.filter==='learning') pool = pool.filter(w=> known[w.sr] !== 'known');
+  S.deck = shuffle(pool).map(w=>({sr:w.sr, ru:w.ru, gender:w.gender, plural:w.plural, dir: S.dir==='mixed' ? (Math.random()<0.5?'sr-ru':'ru-sr') : S.dir}));
+  S.di = 0; S.flipped = false;
+}
+
+function newBlitzQ(){
+  const pool = topicPool();
+  const w = pick(pool);
+  const dir = S.dir==='mixed' ? (Math.random()<0.5?'sr-ru':'ru-sr') : S.dir;
+  const isCorrect = Math.random() < 0.5;
+  let shown;
+  if(isCorrect){ shown = dir==='sr-ru' ? w.ru : w.sr; }
+  else{
+    let other; do{ other = pick(pool); } while(other.sr===w.sr);
+    shown = dir==='sr-ru' ? other.ru : other.sr;
+  }
+  S.blitz.q = {w, dir, shown, isCorrect};
+  S.blitz.answered = false; S.blitz.correct = null;
+  clearInterval(S.blitz.timer);
+  S.blitz.tLeft = 100;
+  S.blitz.timer = setInterval(()=>{
+    S.blitz.tLeft -= 2;
+    const el = document.getElementById('timerfill');
+    if(el) el.style.width = Math.max(0,S.blitz.tLeft)+'%';
+    if(S.blitz.tLeft<=0){ answerBlitz(null); }
+  }, 60);
+}
+
+function answerBlitz(userSaysCorrect){
+  if(S.blitz.answered) return;
+  clearInterval(S.blitz.timer);
+  S.blitz.answered = true;
+  const actuallyCorrect = S.blitz.q.isCorrect;
+  const rightAnswer = (userSaysCorrect === actuallyCorrect);
+  S.blitz.correct = userSaysCorrect===null ? 'timeout' : rightAnswer;
+  S.blitz.total++;
+  if(rightAnswer) S.blitz.score++;
+  render();
+  setTimeout(()=>{ newBlitzQ(); render(); }, 900);
+}
+
+function newTypeQ(){
+  const pool = topicPool();
+  const w = pick(pool);
+  const dir = S.dir==='mixed' ? (Math.random()<0.5?'sr-ru':'ru-sr') : S.dir;
+  S.typeCard = {q:{w,dir}, feedback:null, checked:false};
+}
+
+function checkType(){
+  const val = document.getElementById('type-input').value.trim().toLowerCase();
+  const {w,dir} = S.typeCard.q;
+  const answer = (dir==='sr-ru' ? w.ru : w.sr).toLowerCase();
+  const ok = val.length>0 && (answer===val || answer.split(/[\/,]/).some(a=>a.trim()===val));
+  S.typeCard.checked = true;
+  S.typeCard.feedback = ok ? 'ok' : 'bad';
+  S.typeCard.correctAnswer = answer;
+  render();
+  if(ok){ setTimeout(()=>{ newTypeQ(); render(); }, 500); }
+}
+
+function insertChar(inputId, ch){
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  const start = el.selectionStart ?? el.value.length;
+  const end = el.selectionEnd ?? el.value.length;
+  el.value = el.value.slice(0,start) + ch + el.value.slice(end);
+  el.focus();
+  const pos = start + ch.length;
+  el.setSelectionRange(pos,pos);
+}
+
+function verbForms(v, tense){
+  if(tense==='present') return {sr:v.pres, ru:v.ru_pres};
+  if(tense==='past') return {sr:v.past, ru:v.ru_past};
+  return {sr:v.fut, ru:v.ru_fut};
+}
+
+// "sam radio/radila" -> ["sam radio", "sam radila"]; "radim" -> ["radim"]
+function acceptableAnswers(answer){
+  const parts = answer.split(' ');
+  const last = parts[parts.length-1];
+  if(last.includes('/')){
+    const prefix = parts.slice(0,-1).join(' ');
+    return last.split('/').map(a => (prefix ? prefix+' ' : '') + a);
+  }
+  return [answer];
+}
+
+function buildRuSentence(pk, ruVerb, ruPhrase){
+  const parts = [RU_PRON[pk], ruVerb, ruPhrase].filter(p=>p && p.length);
+  const s = parts.join(' ');
+  return s.charAt(0).toUpperCase() + s.slice(1) + '.';
+}
+
+function newVerbQ(forcedVerb){
+  const v = forcedVerb || pick(VERBS);
+  const pk = pick(PKEYS);
+  const ph = pick(v.ph);
+  const tense = S.tense==='all' ? pick(['present','past','future']) : S.tense;
+  const forms = verbForms(v, tense);
+  const answer = forms.sr[pk];
+  const ruAnswer = forms.ru[pk];
+  S.vQ = {v, pk, ph, answer, ruAnswer, tense};
+  S.vChecked = false; S.vFeedback = null;
+  if(S.vMode==='choice'){
+    const uniqueOthers = [...new Set(PKEYS.filter(k=>k!==pk).map(k=>forms.sr[k]).filter(f=>f!==answer))];
+    const wrong = shuffle(uniqueOthers).slice(0,3);
+    S.vOptions = shuffle([answer, ...wrong]);
+  }
+}
+
+function answerVerbChoice(opt){
+  if(S.vChecked) return;
+  S.vChecked = true;
+  S.vFeedback = (opt===S.vQ.answer) ? 'ok' : 'bad';
+  S.vTotal++; if(S.vFeedback==='ok') S.vScore++;
+  render();
+  if(S.vFeedback==='ok'){ setTimeout(()=>{ newVerbQ(); render(); }, 2000); }
+}
+
+function checkVerbType(){
+  const val = document.getElementById('verb-input').value.trim().toLowerCase();
+  S.vChecked = true;
+  const candidates = acceptableAnswers(S.vQ.answer).map(a=>a.toLowerCase());
+  S.vFeedback = candidates.includes(val) ? 'ok':'bad';
+  S.vTotal++; if(S.vFeedback==='ok') S.vScore++;
+  render();
+  if(S.vFeedback==='ok'){ setTimeout(()=>{ newVerbQ(); render(); }, 2000); }
+}
+
+function doSearch(){
+  const input = document.getElementById('global-search');
+  if(!input) return;
+  const q = input.value.trim().toLowerCase();
+  if(!q) return;
+  if(S.tab==='verbs'){
+    let v = VERBS.find(x=>x.inf.toLowerCase()===q) || VERBS.find(x=>x.ru.toLowerCase()===q);
+    if(!v) v = VERBS.find(x=>x.inf.toLowerCase().includes(q)) || VERBS.find(x=>x.ru.toLowerCase().includes(q));
+    if(v){ S.searchMsg=null; newVerbQ(v); }
+    else { S.searchMsg='Глагол не найден'; }
+  } else {
+    const pool = allWords();
+    let w = pool.find(x=>x.sr.toLowerCase()===q) || pool.find(x=>x.ru.toLowerCase()===q);
+    if(!w) w = pool.find(x=>x.sr.toLowerCase().includes(q)) || pool.find(x=>x.ru.toLowerCase().includes(q));
+    if(w){
+      S.searchMsg=null;
+      S.mode='scroll';
+      clearInterval(S.blitz.timer);
+      S.deck = [{sr:w.sr, ru:w.ru, gender:w.gender, plural:w.plural, dir: S.dir==='mixed'?'sr-ru':S.dir}];
+      S.di=0; S.flipped=false;
+    } else { S.searchMsg='Слово не найдено'; }
+  }
+  render();
+}
+
+function topicsLabel(){
+  const n = S.selectedTopics.size;
+  if(n===0 || n===TOPICS.length) return 'выбраны все';
+  return `выбрано ${n}`;
+}
+
+function toggleTopic(id){
+  const s = new Set(S.selectedTopics);
+  if(id==='__all__'){ s.clear(); }
+  else if(s.has(id)){ s.delete(id); }
+  else{ s.add(id); }
+  S.selectedTopics = s;
+  if(S.mode==='scroll') buildDeck();
+  S.blitz.q=null; S.typeCard.q=null; clearInterval(S.blitz.timer);
+}
+
+/* ---------------- RENDER ---------------- */
+
+function cardFace(w,dir,flipped){
+  const front = dir==='sr-ru' ? w.sr : w.ru;
+  const back = dir==='sr-ru' ? w.ru : w.sr;
+  const frontIsSr = dir==='sr-ru';
+  const meta = w.gender ? `<div class="word-meta">${w.gender}${w.plural? ' · мн. ч.: '+w.plural : ''}</div>` : '';
+  return `
+   <div class="card-wrap"><div class="card ${flipped?'flipped':''}" data-action="flip">
+    <div class="face front"><span class="tag">${frontIsSr?'srpski':'русский'}</span>
+      <div class="word-main">${front}</div>
+      ${frontIsSr ? meta : ''}
+      <div class="hint">нажми, чтобы перевернуть</div>
+    </div>
+    <div class="face back"><span class="tag">${frontIsSr?'русский':'srpski'}</span>
+      <div class="word-main">${back}</div>
+      ${!frontIsSr ? meta : ''}
+    </div>
+   </div></div>`;
+}
+
+function renderCards(){
+  const st = known[S.deck[S.di]?.sr];
+  return `
+  <div class="panel">
+    <div class="label">Направление</div>
+    <div class="seg">
+      <button data-action="dir" data-v="sr-ru" class="${S.dir==='sr-ru'?'active':''}">SR → RU</button>
+      <button data-action="dir" data-v="ru-sr" class="${S.dir==='ru-sr'?'active':''}">RU → SR</button>
+      <button data-action="dir" data-v="mixed" class="${S.dir==='mixed'?'active':''}">Вперемешку</button>
+    </div>
+    <div class="label">Режим</div>
+    <div class="seg">
+      <button data-action="mode" data-v="scroll" class="${S.mode==='scroll'?'active':''}">Листать</button>
+      <button data-action="mode" data-v="blitz" class="${S.mode==='blitz'?'active':''}">Блиц</button>
+      <button data-action="mode" data-v="type" class="${S.mode==='type'?'active':''}">Вписывать</button>
+    </div>
+    ${S.mode==='scroll'?`
+    <div class="label">Слова</div>
+    <div class="seg">
+      <button data-action="filter" data-v="all" class="${S.filter==='all'?'active':''}">Все</button>
+      <button data-action="filter" data-v="learning" class="${S.filter==='learning'?'active':''}">Только незнакомые</button>
+    </div>`:''}
+    <div class="label">Темы</div>
+    <div class="topic-dropdown">
+      <button type="button" class="topic-header" data-action="topictoggle">
+        <span>Темы (${topicsLabel()})</span>
+        <span class="chevron">${S.topicsOpen?'▴':'▾'}</span>
+      </button>
+      ${S.topicsOpen ? `<div class="letter-row" style="justify-content:flex-start;margin-top:8px;">
+        <button type="button" class="chip ${S.selectedTopics.size===0?'active':''}" data-action="topic" data-v="__all__">Все</button>
+        ${TOPICS.map(t=>`<button type="button" class="chip ${S.selectedTopics.has(t.id)?'active':''}" data-action="topic" data-v="${t.id}">${t.label}</button>`).join('')}
+      </div>` : ''}
+    </div>
+  </div>
+
+  ${renderCardBody(st)}
+
+  <div class="panel">
+    <div class="label">Добавить своё слово</div>
+    <div class="add-form">
+      <input type="text" id="add-sr" placeholder="сербский (латиница)">
+      <input type="text" id="add-ru" placeholder="русский">
+    </div>
+    <div class="add-form" style="margin-top:8px;">
+      <select id="add-cat">${TOPICS.map(t=>`<option value="${t.id}">${t.label}</option>`).join('')}</select>
+      <button class="btn primary small" data-action="addword">+ Добавить</button>
+    </div>
+    <div class="stat-line">В колоде: ${allWords().length} слов${custom.length?` (из них ${custom.length} добавлено вами)`:''}</div>
+  </div>`;
+}
+
+function renderCardBody(st){
+  if(S.mode==='scroll'){
+    if(!S.deck.length) return `<div class="panel"><div class="empty">Все слова отмечены как «знаю» 🎉<br>Переключись на «Все слова», чтобы повторить их снова.</div></div>`;
+    const w = S.deck[S.di];
+    return `<div class="panel">
+      ${cardFace(w, w.dir, S.flipped)}
+      <div class="nav-row">
+        <button class="btn ghost" data-action="prev">◀</button>
+        <button class="btn bad wide" data-action="mark" data-v="learning">Ещё учу</button>
+        <button class="btn ok wide" data-action="mark" data-v="known">✓ Знаю</button>
+        <button class="btn ghost" data-action="next">▶</button>
+      </div>
+      <div class="stat-line">${S.di+1} / ${S.deck.length}${st?` · статус: ${st==='known'?'знаю':'учу'}`:''}</div>
+    </div>`;
+  }
+  if(S.mode==='blitz'){
+    if(!S.blitz.q) newBlitzQ();
+    const b = S.blitz;
+    return `<div class="panel">
+      <div class="score-row"><span>Счёт: <b>${b.score}/${b.total}</b></span><span>${b.answered? (b.correct==='timeout'?'⏱ время вышло':(b.correct?'✓ верно':'✗ неверно')) : ''}</span></div>
+      <div class="timerbar-track"><div class="timerbar-fill" id="timerfill" style="width:${b.tLeft}%"></div></div>
+      <div class="card-wrap"><div class="card"><div class="face front" style="position:static;">
+        <span class="tag">${b.q.dir==='sr-ru'?'srpski':'русский'}</span>
+        <div class="word-main">${b.q.dir==='sr-ru'?b.q.w.sr:b.q.w.ru}</div>
+        <div class="word-sub">${b.q.dir==='sr-ru'?'русский перевод:':'srpski prevod:'} <b>${b.q.shown}</b></div>
+      </div></div></div>
+      <div class="nav-row">
+        <button class="btn bad wide" data-action="blitz" data-v="false" ${b.answered?'disabled':''}>✗ Неверно</button>
+        <button class="btn ok wide" data-action="blitz" data-v="true" ${b.answered?'disabled':''}>✓ Верно</button>
+      </div>
+    </div>`;
+  }
+  // type mode
+  if(!S.typeCard.q) newTypeQ();
+  const t = S.typeCard, q = t.q;
+  const prompt = q.dir==='sr-ru' ? q.w.sr : q.w.ru;
+  const promptTag = q.dir==='sr-ru' ? 'srpski' : 'русский';
+  const askTag = q.dir==='sr-ru' ? 'напиши перевод по-русски' : 'напиши перевод на сербском (латиница)';
+  return `<div class="panel">
+    <div class="card-wrap"><div class="card"><div class="face front" style="position:static;">
+      <span class="tag">${promptTag}</span>
+      <div class="word-main">${prompt}</div>
+      <div class="hint">${askTag}</div>
+    </div></div></div>
+    <input type="text" id="type-input" class="${t.checked? t.feedback:''}" placeholder="ответ..." ${t.checked?'disabled':''} autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+    ${(!t.checked && q.dir==='ru-sr') ? `<div class="letter-row">${['š','č','ć','ž','đ'].map(c=>`<button type="button" class="letter-btn" data-action="ins" data-target="type-input" data-v="${c}">${c}</button>`).join('')}</div>` : ''}
+    <div class="feedback ${t.feedback||''}">${t.checked ? (t.feedback==='ok' ? '✓ Верно!' : `✗ Правильный ответ: ${t.correctAnswer}`) : ''}</div>
+    <div class="nav-row" style="margin-top:10px;">
+      ${t.checked && t.feedback==='bad' ? `<button class="btn primary wide" data-action="typenext">Далее →</button>`
+                  : (t.checked ? '' : `<button class="btn primary wide" data-action="typecheck">Проверить</button>`)}
+    </div>
+  </div>`;
+}
+
+function renderConjTable(title, forms, note){
+  return `<div class="conj-block">
+    <div class="conj-title">${title}${note?` <span style="opacity:.7;font-weight:400;text-transform:none;">(${note})</span>`:''}</div>
+    <table class="conj-table">
+      <tr><th></th><th>Ед. число</th><th>Мн. число</th></tr>
+      <tr><td>1-е лицо</td><td>${PRON.ja} ${forms.ja}</td><td>${PRON.mi} ${forms.mi}</td></tr>
+      <tr><td>2-е лицо</td><td>${PRON.ti} ${forms.ti}</td><td>${PRON.vi} ${forms.vi}</td></tr>
+      <tr><td>3-е лицо</td><td>${PRON.on} ${forms.on}</td><td>${PRON.oni} ${forms.oni}</td></tr>
+    </table>
+  </div>`;
+}
+
+function renderRulesModal(){
+  if(!S.rulesFor) return '';
+  const v = VERBS.find(x=>x.inf===S.rulesFor);
+  if(!v) return '';
+  return `<div class="modal-overlay" data-action="closerules">
+    <div class="modal-box" data-action="noop">
+      <button type="button" class="modal-close" data-action="closerules">×</button>
+      <h3>${v.inf}</h3>
+      <div class="modal-sub">${v.ru} · группа ${v.group}</div>
+      ${renderConjTable('Настоящее время', v.pres)}
+      ${renderConjTable('Прошедшее время', v.past)}
+      ${renderConjTable('Будущее время', v.fut)}
+    </div>
+  </div>`;
+}
+
+function renderVerbs(){
+  if(!S.vQ) newVerbQ();
+  const {v,pk,ph,answer,ruAnswer,tense} = S.vQ;
+  const sentence = `${PRON[pk]} <span class="blank">${S.vChecked? answer : '____'}</span> ${ph.sr}.`;
+  const ruSentence = buildRuSentence(pk, ruAnswer, ph.ru);
+  return `
+  <div class="panel">
+    <div class="label">Режим</div>
+    <div class="seg">
+      <button data-action="vmode" data-v="choice" class="${S.vMode==='choice'?'active':''}">Выбрать</button>
+      <button data-action="vmode" data-v="type" class="${S.vMode==='type'?'active':''}">Вписать</button>
+    </div>
+    <div class="label">Время</div>
+    <div class="seg">
+      ${TENSE_UI.map(([id,label])=>`<button data-action="tense" data-v="${id}" class="${S.tense===id?'active':''}">${label}</button>`).join('')}
+    </div>
+  </div>
+  <div class="panel">
+    <div class="score-row">
+      <span>Счёт: <b>${S.vScore}/${S.vTotal}</b></span>
+      <span class="group-tag">${v.inf} · ${v.group} · ${v.ru}</span>
+    </div>
+    <div style="text-align:right;">
+      <button type="button" class="rules-link" data-action="rules" data-v="${v.inf}">правила спряжения ⓘ</button>
+    </div>
+    <div class="pron-tag">${PRON[pk]} · ${TENSE_LABEL[tense]}</div>
+    <div class="sentence">${sentence}</div>
+    <div class="ru-sentence">${ruSentence}</div>
+    ${S.vMode==='choice' ? `
+      <div class="opt-grid">
+        ${S.vOptions.map(o=>`<div class="opt ${S.vChecked && o===answer?'correct':''} ${S.vChecked && o!==answer?'wrong':''}" data-action="vchoice" data-v="${o}">${o}</div>`).join('')}
+      </div>
+      <div class="feedback ${S.vFeedback||''}">${S.vChecked ? (S.vFeedback==='ok'?'✓ Верно!':`✗ Правильно: ${answer}`) : 'Выбери правильную форму'}</div>
+      <div class="nav-row" style="margin-top:10px;">
+        ${S.vChecked && S.vFeedback==='bad' ? `<button class="btn primary wide" data-action="verbnext">Далее →</button>` : ''}
+      </div>
+    ` : `
+      <input type="text" id="verb-input" class="${S.vChecked? S.vFeedback:''}" placeholder="впиши форму глагола" ${S.vChecked?'disabled':''} autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+      ${!S.vChecked ? `<div class="letter-row">${['š','č','ć','ž','đ'].map(c=>`<button type="button" class="letter-btn" data-action="ins" data-target="verb-input" data-v="${c}">${c}</button>`).join('')}</div>` : ''}
+      <div class="feedback ${S.vFeedback||''}">${S.vChecked ? (S.vFeedback==='ok'?'✓ Верно!':`✗ Правильно: ${answer}`) : ''}</div>
+      <div class="nav-row" style="margin-top:10px;">
+        ${S.vChecked && S.vFeedback==='bad' ? `<button class="btn primary wide" data-action="verbnext">Далее →</button>`
+                     : (S.vChecked ? '' : `<button class="btn primary wide" data-action="verbcheck">Проверить</button>`)}
+      </div>
+    `}
+  </div>
+  ${renderRulesModal()}`;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="header">
+      <div><h1>Srpski</h1><div class="sub">лексика и глаголы, без пощады</div></div>
+      <div class="search-box">
+        <input type="text" id="global-search" placeholder="🔍 слово" autocomplete="off" autocapitalize="off">
+        <button type="button" class="search-btn" data-action="dosearch">→</button>
+      </div>
+    </div>
+    ${S.searchMsg? `<div class="search-msg">${S.searchMsg}</div>` : ''}
+    <div class="tabs">
+      <div class="tab ${S.tab==='cards'?'active':''}" data-action="tab" data-v="cards">Карточки</div>
+      <div class="tab ${S.tab==='verbs'?'active':''}" data-action="tab" data-v="verbs">Глаголы</div>
+    </div>
+    ${S.tab==='cards' ? renderCards() : renderVerbs()}
+  `;
+  if(S.mode==='blitz' && S.tab==='cards'){
+    const el = document.getElementById('timerfill');
+    if(el) el.style.width = S.blitz.tLeft+'%';
+  }
+  if(S.tab==='cards' && S.mode==='type' && !S.typeCard.checked){
+    const el = document.getElementById('type-input');
+    if(el) el.focus();
+  }
+  if(S.tab==='verbs' && S.vMode==='type' && !S.vChecked){
+    const el = document.getElementById('verb-input');
+    if(el) el.focus();
+  }
+}
+
+/* ---------------- EVENTS ---------------- */
+
+document.getElementById('app').addEventListener('click', async (e)=>{
+  const t = e.target.closest('[data-action]');
+  if(!t) return;
+  const action = t.dataset.action, v = t.dataset.v;
+
+  if(action==='tab'){ S.tab=v; if(v==='cards'&&S.mode==='scroll'&&!S.deck.length) buildDeck(); if(v==='verbs'&&!S.vQ) newVerbQ(); render(); return; }
+  if(action==='dir'){ S.dir=v; S.blitz.q=null; S.typeCard.q=null; clearInterval(S.blitz.timer); if(S.mode==='scroll') buildDeck(); render(); return; }
+  if(action==='mode'){ S.mode=v; clearInterval(S.blitz.timer); S.blitz.q=null; S.typeCard.q=null; if(v==='scroll') buildDeck(); render(); return; }
+  if(action==='filter'){ S.filter=v; buildDeck(); render(); return; }
+  if(action==='topictoggle'){ S.topicsOpen = !S.topicsOpen; render(); return; }
+  if(action==='topic'){ toggleTopic(v); render(); return; }
+  if(action==='flip'){ S.flipped=!S.flipped; render(); return; }
+  if(action==='prev'){ S.di=(S.di-1+S.deck.length)%S.deck.length; S.flipped=false; render(); return; }
+  if(action==='next'){ S.di=(S.di+1)%S.deck.length; S.flipped=false; render(); return; }
+  if(action==='mark'){
+    const w = S.deck[S.di]; known[w.sr]=v; await saveKnown();
+    if(S.filter==='learning' && v==='known'){ S.deck.splice(S.di,1); if(S.di>=S.deck.length) S.di=0; S.flipped=false; }
+    else { S.di=(S.di+1)%S.deck.length; S.flipped=false; }
+    render(); return;
+  }
+  if(action==='blitz'){ answerBlitz(v==='true'); return; }
+  if(action==='ins'){ insertChar(t.dataset.target, v); return; }
+  if(action==='typecheck'){ checkType(); return; }
+  if(action==='typenext'){ newTypeQ(); render(); return; }
+  if(action==='vmode'){ S.vMode=v; newVerbQ(); render(); return; }
+  if(action==='tense'){ S.tense=v; newVerbQ(); render(); return; }
+  if(action==='rules'){ S.rulesFor=v; render(); return; }
+  if(action==='closerules'){ S.rulesFor=null; render(); return; }
+  if(action==='noop'){ return; }
+  if(action==='vchoice'){ answerVerbChoice(v); return; }
+  if(action==='verbcheck'){ checkVerbType(); return; }
+  if(action==='verbnext'){ newVerbQ(); render(); return; }
+  if(action==='dosearch'){ doSearch(); return; }
+  if(action==='addword'){
+    const sr = document.getElementById('add-sr').value.trim();
+    const ru = document.getElementById('add-ru').value.trim();
+    const cat = document.getElementById('add-cat').value;
+    if(sr && ru){ custom.push({sr,ru,cat}); await saveCustom(); if(S.mode==='scroll') buildDeck(); render(); }
+    return;
+  }
+});
+
+document.getElementById('app').addEventListener('keydown', (e)=>{
+  if(e.key==='Enter'){
+    if(e.target.id==='type-input') checkType();
+    if(e.target.id==='verb-input') checkVerbType();
+    if(e.target.id==='add-ru'||e.target.id==='add-sr') document.querySelector('[data-action=addword]')?.click();
+    if(e.target.id==='global-search') doSearch();
+  }
+});
+
+/* ---------------- INIT ---------------- */
+
+(async function init(){
+  await loadStore();
+  buildDeck();
+  render();
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* file:// or unsupported — silently ignore */ });
+  }
+})();
+
+})();
+</script>
